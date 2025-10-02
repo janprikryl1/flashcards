@@ -1,19 +1,8 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
-use yew::prelude::*;
 use client::pages::index::Index;
 use client::pages::not_found::NotFound;
-
-#[derive(Clone, Routable, PartialEq)]
-pub enum Route {
-    #[at("/")]
-    Home,
-    #[at("/secure")]
-    Secure,
-    #[not_found]
-    #[at("/404")]
-    NotFound,
-}
+use client::routes::Route;
 
 #[function_component(Secure)]
 fn secure() -> Html {
