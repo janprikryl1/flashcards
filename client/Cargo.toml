@@ -19,4 +19,5 @@ serde_json = "1.0.142"
 gloo-net = "0.4"
 
 web-sys = { version = "0.3", features = ["HtmlInputElement", "RequestCredentials"] }
+tailyew = "0.1.38"
 

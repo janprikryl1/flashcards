@@ -2,6 +2,8 @@ use gloo_net::http::Request;
 use yew::prelude::*;
 use serde::{Deserialize, Serialize};
 use web_sys::RequestCredentials;
+use tailyew::atoms::Button;
+use tailyew::ButtonType;
 use crate::utils::constants::api_base;
 
 #[derive(Serialize)]
@@ -154,14 +156,14 @@ pub fn login_page() -> Html {
                 }}
             />
 
-            <div style="display:flex; gap: .5rem; flex-wrap: wrap;">
-                <button onclick={on_register.clone()}>{ "Registrovat" }</button>
-                <button onclick={on_login.clone()}>{ "Přihlásit" }</button>
-                <button onclick={on_me.clone()}>{ "Kdo jsem (/api/me)" }</button>
-                <button onclick={on_logout.clone()}>{ "Odhlásit" }</button>
-            </div>
 
-            <p style="margin-top:1rem; color:#555;">{ (*msg).clone() }</p>
+                <Button button_type={ButtonType::Ghost} onclick={on_register.clone()}>{ "Registrovat" }</Button>
+                <Button button_type={ButtonType::Ghost} onclick={on_login.clone()}>{ "Přihlásit" }</Button>
+                <Button button_type={ButtonType::Ghost} onclick={on_me.clone()}>{ "Kdo jsem (/api/me)" }</Button>
+                <Button button_type={ButtonType::Ghost} onclick={on_logout.clone()}>{ "Odhlásit" }</Button>
+
+
+            <p style="margin-top:1rem;">{ (*msg).clone() }</p>
 
             {
                 if let Some(me) = &*me {
