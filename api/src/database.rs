@@ -1,6 +1,6 @@
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
 use sqlx::ConnectOptions;
-use std::str::FromStr;
+use std::{env, str::FromStr};
 
 pub struct Database {
     pool: SqlitePool,
@@ -8,7 +8,10 @@ pub struct Database {
 
 impl Database {
     pub async fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        let opts = SqliteConnectOptions::from_str("sqlite://flashcards.db")?
+        dotenvy::dotenv().ok();
+        let db_url = env::var("DATABASE_URL")?;
+
+        let opts = SqliteConnectOptions::from_str(&db_url)?
             .create_if_missing(true)
             .disable_statement_logging()
             .to_owned();
