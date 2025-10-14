@@ -4,14 +4,29 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-axum = "0.6.20"
-hyper = { version = "0.14.27", features = ["full"] }
-tokio = { version = "1.32.0", features = ["full"] }
-tower = "0.4.13"
-serde = { version = "1", features = ["derive"] }   # ← přidat derive
-serde_json = "1"
-sqlx = { version = "0.5", features = ["runtime-tokio-rustls", "sqlite", "macros"] }
-dotenvy = "0.15"
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
 
+# CORS
+tower-http = { version = "0.5", features = ["cors"] }
+
+# Cookies kompatibilní s Axum 0.7 (http v1)
+axum-extra = { version = "0.9", features = ["cookie"] }
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# SQLX 0.5 – správné feature flagy
+sqlx = { version = "0.5.13", features = ["sqlite", "macros", "runtime-tokio-rustls"] }
+
+dotenvy = "0.15"
+bcrypt = "0.15"
+jsonwebtoken = "9"
+chrono = { version = "0.4", features = ["clock"] }
+time = "0.3"
+uuid = { version = "1", features = ["v4"] }
+http = "1.3.1"
+
+# Tohle může zůstat, pokud chceš (není povinné)
 [build-dependencies]
-syn = { version = "1", features = ["full"] }       # ← ponechat kvůli sqlx-macros 0.5.x
+syn = { version = "1", features = ["full"] }

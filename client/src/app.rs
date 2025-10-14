@@ -1,6 +1,7 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 use client::pages::index::Index;
+use client::pages::login_page::LoginPage;
 use client::pages::not_found::NotFound;
 use client::routes::Route;
 
@@ -20,6 +21,7 @@ fn secure() -> Html {
 fn switch(routes: Route) -> Html {
     match routes {
         Route::Home => html! { <Index /> },
+        Route::Login => html! { <LoginPage />},
         Route::Secure => html! {
             <Secure />
         },

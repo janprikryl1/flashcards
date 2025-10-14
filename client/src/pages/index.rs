@@ -1,17 +1,23 @@
 use yew::prelude::*;
-use yew_router::hooks::use_navigator;
-use yew_router::Routable;
+use yew_router::prelude::*;
 use crate::routes::Route;
+
 
 #[function_component(Index)]
 pub fn index() -> Html {
-    let navigator = use_navigator().unwrap();
+    //let navigator = use_navigator().unwrap();
 
-    let onclick = Callback::from(move |_| navigator.push(&Route::Home));
+
     html! {
         <div>
-            <h1>{"Home"}</h1>
-            <button {onclick}>{ "Go Home" }</button>
+            <h1>{"Home page"}</h1>
+             <Link<Route> to={Route::Home} classes={classes!("btn")}>
+                {"Go Home"}
+            </Link<Route>>
+
+            <Link<Route> to={Route::Login} classes={classes!("btn", "btn-primary")}>
+                {"Login"}
+            </Link<Route>>
         </div>
     }
 }

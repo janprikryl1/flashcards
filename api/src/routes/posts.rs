@@ -3,7 +3,7 @@ use axum::{routing::get, Router, Json, Extension};
 use axum::extract::Path;
 
 use crate::database::Database;
-use crate::models::post::Post;
+use crate::dto::post::Post;
 
 pub async fn get_one(Path(id): Path<i64>, Extension(db): Extension<Arc<Database>>, ) -> Json<Post> {
     let post = sqlx::query_as::<_, Post>(
