@@ -1,14 +1,21 @@
-use axum::{
-    routing::get,
-    Router,
-};
+mod database;
+mod models;
+mod routes;
+
+use std::sync::Arc;
+use axum::{routing::get, Router, Extension};
+use crate::routes::posts::{create, get_one, list};
 
 #[tokio::main]
 async fn main() {
-    // build our application with a single route
-    let app = Router::new().route("/", get(|| async { "Hello, World!" }));
+    let db = Arc::new(database::Database::new().await.expect("init db"));
 
-    // run it with hyper on localhost:3000
+    let app = Router::new()
+        .route("/", get(|| async { "Hello, World!" }))
+        .route("/api/posts", get(list).post(create))
+        .route("/api/posts/:id", get(get_one))
+        .layer(Extension(db));
+
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service())
         .await

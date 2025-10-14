@@ -1,0 +1,40 @@
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
+use sqlx::ConnectOptions;
+use std::str::FromStr;
+
+pub struct Database {
+    pool: SqlitePool,
+}
+
+impl Database {
+    pub async fn new() -> Result<Self, Box<dyn std::error::Error>> {
+        let opts = SqliteConnectOptions::from_str("sqlite://flashcards.db")?
+            .create_if_missing(true)
+            .disable_statement_logging()
+            .to_owned();
+
+        let pool = SqlitePoolOptions::new()
+            .max_connections(5)
+            .connect_with(opts)
+            .await?;
+
+        sqlx::query("PRAGMA journal_mode = WAL;").execute(&pool).await?;
+        sqlx::query("PRAGMA foreign_keys = ON;").execute(&pool).await?;
+
+        sqlx::query(r#"
+            CREATE TABLE IF NOT EXISTS posts (
+                id INTEGER PRIMARY KEY,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL
+            );"#)
+            .execute(&pool)
+            .await?;
+
+        Ok(Self { pool })
+    }
+
+    // malý getter místo přístupu na privátní pole
+    pub fn pool(&self) -> &SqlitePool {
+        &self.pool
+    }
+}
