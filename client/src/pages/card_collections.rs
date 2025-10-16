@@ -5,15 +5,15 @@ use yew_router::prelude::*;
 use crate::utils::routes::Route;
 
 
-#[function_component(Game)]
-pub fn game() -> Html {
+#[function_component(CardCollections)]
+pub fn card_collections() -> Html {
     //let navigator = use_navigator().unwrap();
 
 
     html! {
         <div>
-            <h1>{"Hra"}</h1>
-             
+            <h1>{"Balíčky karet"}</h1>
+
 
         </div>
     }

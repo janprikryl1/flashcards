@@ -17,7 +17,7 @@ pub fn login_page() -> Html {
     let is_logged_in = auth.me.is_some();
     use_effect_with(is_logged_in, move |logged_in| {
         if *logged_in {
-            nav.replace(&Route::Dashboard);
+            nav.replace(&Route::Home);
         }
         || ()
     });

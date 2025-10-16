@@ -5,14 +5,14 @@ use yew_router::prelude::*;
 use crate::utils::routes::Route;
 
 
-#[function_component(Dashboard)]
-pub fn dashboard() -> Html {
+#[function_component(Cards)]
+pub fn cards() -> Html {
     //let navigator = use_navigator().unwrap();
 
 
     html! {
         <div>
-            <h1>{"Dashboard"}</h1>
+            <h1>{"Kartičky"}</h1>
 
 
         </div>

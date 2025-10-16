@@ -47,8 +47,9 @@ pub fn navbar() -> Html {
                         if auth.me.is_some() {
                             html! {
                                 <>
-                                    <Link<Route> to={Route::Game} classes="opacity-80 hover:opacity-100">{ "Hra" }</Link<Route>>
-                                    <Link<Route> to={Route::Dashboard} classes="opacity-80 hover:opacity-100">{ "Dashboard" }</Link<Route>>
+                                    <Link<Route> to={Route::Cards} classes="opacity-80 hover:opacity-100">{ "Kartičky" }</Link<Route>>
+                                    <Link<Route> to={Route::CardCollections} classes="opacity-80 hover:opacity-100">{ "Balíčky karet" }</Link<Route>>
+                                    <Link<Route> to={Route::Study} classes="opacity-80 hover:opacity-100">{ "Studovat" }</Link<Route>>
                                 </>
                             }
                         } else {

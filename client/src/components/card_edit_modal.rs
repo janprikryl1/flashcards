@@ -5,15 +5,15 @@ use yew_router::prelude::*;
 use crate::utils::routes::Route;
 
 
-#[function_component(MyCards)]
-pub fn my_cards() -> Html {
+#[function_component(CardEditModal)]
+pub fn card_edit_modal() -> Html {
     //let navigator = use_navigator().unwrap();
 
 
     html! {
         <div>
-            <h1>{"Moje kartičky"}</h1>
-             <Button button_type={ButtonType::Primary}>{ "Přidat" }</Button>
+            <h1>{"Edit kartičky"}</h1>
+
 
         </div>
     }
