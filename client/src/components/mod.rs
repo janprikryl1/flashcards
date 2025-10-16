@@ -8,3 +8,4 @@ pub mod main_features;
 pub mod hero;
 mod icon;
 pub mod stats_summary;
+pub mod flashcard_manager;
