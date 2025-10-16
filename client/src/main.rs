@@ -1,11 +1,25 @@
+use yew::{function_component, html, Html};
+use yew_router::BrowserRouter;
+use crate::auth::AuthProvider;
+use crate::components::layout::MainLayout;
+
 mod app;
 mod components;
 mod utils;
+mod auth;
+mod pages;
 
-use app::App;
-
-fn main() {
-    yew::Renderer::<App>::new().render();
+#[function_component(Root)]
+fn root() -> Html {
+    html! {
+        <AuthProvider>
+            <BrowserRouter>
+                <MainLayout />
+            </BrowserRouter>
+        </AuthProvider>
+    }
 }
 
-// trunk serve
+fn main() {
+    yew::Renderer::<Root>::new().render();
+}

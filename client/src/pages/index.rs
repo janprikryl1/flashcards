@@ -1,8 +1,8 @@
-use tailyew::{Avatar, Badge, Button, ButtonType, LinearProgressIndicator, Typo};
+use tailyew::{Button, ButtonType};
 use web_sys::console;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::routes::Route;
+use crate::utils::routes::Route;
 
 
 #[function_component(Index)]

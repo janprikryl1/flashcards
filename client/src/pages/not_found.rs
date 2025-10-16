@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
-use crate::routes::Route;
+use crate::utils::routes::Route;
 
 #[function_component(NotFound)]
 pub fn not_found() -> Html {
