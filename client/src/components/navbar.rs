@@ -11,7 +11,6 @@ use crate::utils::constants::api_base;
 #[function_component(Navbar)]
 pub fn navbar() -> Html {
     let auth = use_auth();
-    let navigator = use_navigator().unwrap();
 
     let on_logout = {
         let auth = auth.clone();
@@ -43,8 +42,19 @@ pub fn navbar() -> Html {
         <nav class="w-full border-b bg-white">
             <div class="max-w-5xl mx-auto flex items-center justify-between p-3">
                 <div class="flex items-center gap-4">
-                    <Link<Route> to={Route::Home} classes="font-semibold">{ "MojeApp" }</Link<Route>>
-                    <Link<Route> to={Route::Secure} classes="opacity-80 hover:opacity-100">{ "Secure" }</Link<Route>>
+                    <Link<Route> to={Route::Home} classes="font-semibold">{ "Přehled" }</Link<Route>>
+                    {
+                        if auth.me.is_some() {
+                            html! {
+                                <>
+                                    <Link<Route> to={Route::Game} classes="opacity-80 hover:opacity-100">{ "Hra" }</Link<Route>>
+                                    <Link<Route> to={Route::Dashboard} classes="opacity-80 hover:opacity-100">{ "Dashboard" }</Link<Route>>
+                                </>
+                            }
+                        } else {
+                            html! {}
+                        }
+                    }
                 </div>
 
                 <div class="flex items-center gap-3">

@@ -6,8 +6,10 @@ pub enum Route {
     Home,
     #[at("/login")]
     Login,
-    #[at("/secure")]
-    Secure,
+    #[at("/game")]
+    Game,
+    #[at("/dashboard")]
+    Dashboard,
     #[not_found]
     #[at("/404")]
     NotFound,

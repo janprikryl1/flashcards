@@ -3,7 +3,6 @@ use yew_router::BrowserRouter;
 use crate::auth::AuthProvider;
 use crate::components::layout::MainLayout;
 
-mod app;
 mod components;
 mod utils;
 mod auth;

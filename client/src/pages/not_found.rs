@@ -6,7 +6,7 @@ use crate::utils::routes::Route;
 pub fn not_found() -> Html {
     let navigator = use_navigator().unwrap();
 
-    let onclick = Callback::from(move |_| navigator.push(&Route::Secure));
+    let onclick = Callback::from(move |_| navigator.push(&Route::Home));
     html! {
         <div>
             <h1>{ "404" }</h1>

@@ -22,7 +22,7 @@ pub fn register(dispatch: UseReducerHandle<AuthStore>, email: String, password: 
 
         match resp {
             Ok(r) if r.status() == 201 =>
-                dispatch.dispatch(AuthAction::SetMessage(Some("Registrace OK".into()))),
+                dispatch.dispatch(AuthAction::SetMessage(Some("Registrace proběhla úspěšně".into()))),
             Ok(r) =>
                 dispatch.dispatch(AuthAction::SetMessage(Some(format!("Registrace selhala: {}", r.status())))),
             Err(e) =>
@@ -47,7 +47,7 @@ pub fn login(dispatch: UseReducerHandle<AuthStore>, email: String, password: Str
 
         match resp {
             Ok(r) if r.status() == 204 => {
-                dispatch.dispatch(AuthAction::SetMessage(Some("Přihlášení OK".into())));
+                dispatch.dispatch(AuthAction::SetMessage(Some("Přihlášení proběhlo úspěšně".into())));
                 let me = Request::get(&format!("{}/api/me", api_base()))
                     .credentials(RequestCredentials::Include)
                     .send().await;

@@ -1,44 +1,52 @@
 use yew::prelude::*;
 use tailyew::atoms::Button;
-use tailyew::ButtonType;
-
+use tailyew::{ButtonType, Input, InputType};
 use crate::auth::{use_auth, MeResponse};
 use crate::auth::actions::{login, register};
+use yew_router::prelude::*;
+use crate::utils::routes::Route;
 
 #[function_component(LoginPage)]
 pub fn login_page() -> Html {
+    let nav = use_navigator().expect("LoginPage must be under <BrowserRouter>");
     let auth = use_auth();
 
     let email = use_state(|| String::new());
     let password = use_state(|| String::new());
 
-    let on_email = {
+    let is_logged_in = auth.me.is_some();
+    use_effect_with(is_logged_in, move |logged_in| {
+        if *logged_in {
+            nav.replace(&Route::Dashboard);
+        }
+        || ()
+    });
+
+    let on_email: Callback<String> = {
         let email = email.clone();
-        Callback::from(move |e: InputEvent| {
-            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
-            email.set(input.value());
-        })
+        Callback::from(move |val: String| email.set(val))
     };
-    let on_pass = {
+    let on_pass: Callback<String> = {
         let password = password.clone();
-        Callback::from(move |e: InputEvent| {
-            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
-            password.set(input.value());
-        })
+        Callback::from(move |val: String| password.set(val))
     };
 
     let on_register = {
         let auth = auth.clone();
         let email = email.clone();
         let password = password.clone();
-        Callback::from(move |_| register(auth.clone(), (*email).clone(), (*password).clone()))
+        Callback::from(move |_| {
+            register(auth.clone(), (*email).clone(), (*password).clone())
+        })
     };
 
     let on_login = {
         let auth = auth.clone();
         let email = email.clone();
         let password = password.clone();
-        Callback::from(move |_| login(auth.clone(), (*email).clone(), (*password).clone()))
+        Callback::from(move |_| {
+            login(auth.clone(), (*email).clone(), (*password).clone())
+        })
     };
 
     html! {
@@ -46,16 +54,20 @@ pub fn login_page() -> Html {
             <h1 class="text-lg font-bold">{ "Přihlášení" }</h1>
 
             <label for="email">{ "Email" }</label>
-            <input id="email" type="email"
-                style="width: 100%; margin-bottom: .5rem;"
-                value={(*email).clone()} oninput={on_email}
+            <Input
+                id="email"
+                input_type={InputType::Email}
+                default_value={(*email).clone()}
+                on_change={on_email}
                 disabled={auth.loading}
             />
 
             <label for="password">{ "Heslo" }</label>
-            <input id="password" type="password"
-                style="width: 100%; margin-bottom: 1rem;"
-                value={(*password).clone()} oninput={on_pass}
+            <Input
+                id="password"
+                input_type={InputType::Password}
+                default_value={(*password).clone()}
+                on_change={on_pass}
                 disabled={auth.loading}
             />
 
