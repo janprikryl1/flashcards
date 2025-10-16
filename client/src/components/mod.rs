@@ -4,3 +4,7 @@ pub mod layout;
 pub mod my_cards;
 pub mod card_edit_modal;
 pub mod collection_edit_modal;
+pub mod main_features;
+pub mod hero;
+mod icon;
+pub mod stats_summary;

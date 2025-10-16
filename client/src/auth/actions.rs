@@ -69,3 +69,27 @@ pub fn login(dispatch: UseReducerHandle<AuthStore>, email: String, password: Str
         dispatch.dispatch(AuthAction::SetLoading(false));
     });
 }
+
+pub fn logout(dispatch: UseReducerHandle<AuthStore>) {
+    spawn_local(async move {
+        dispatch.dispatch(AuthAction::SetLoading(true));
+        dispatch.dispatch(AuthAction::SetMessage(None));
+
+        let resp = Request::post(&format!("{}/api/logout", api_base()))
+            .credentials(RequestCredentials::Include)
+            .send().await;
+
+        match resp {
+            Ok(r) if r.status() == 204 => {
+                dispatch.dispatch(AuthAction::SetMe(None));
+                dispatch.dispatch(AuthAction::SetMessage(Some("Odhlášen".into())));
+            }
+            Ok(r) =>
+                dispatch.dispatch(AuthAction::SetMessage(Some(format!("Chyba odhlášení: {}", r.status())))),
+            Err(e) =>
+                dispatch.dispatch(AuthAction::SetMessage(Some(format!("Chyba: {e}")))),
+        }
+
+        dispatch.dispatch(AuthAction::SetLoading(false));
+    });
+}

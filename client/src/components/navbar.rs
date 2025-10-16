@@ -1,78 +1,94 @@
-use gloo_net::http::Request;
-use web_sys::RequestCredentials;
 use yew::prelude::*;
 use yew_router::prelude::*;
 use tailyew::atoms::Button;
 use tailyew::ButtonType;
+
 use crate::utils::routes::Route;
-use crate::auth::{use_auth, AuthAction};
-use crate::utils::constants::api_base;
+use crate::auth::use_auth;
+use crate::auth::actions::logout;
 
 #[function_component(Navbar)]
 pub fn navbar() -> Html {
     let auth = use_auth();
+    let route = use_route::<Route>();
 
     let on_logout = {
         let auth = auth.clone();
-        Callback::from(move |_| {
-            let auth = auth.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                let resp = Request::post(&format!("{}/api/logout", api_base()))
-                    .credentials(RequestCredentials::Include)
-                    .send()
-                    .await;
+        Callback::from(move |_| logout(auth.clone()))
+    };
 
-                match resp {
-                    Ok(r) if r.status() == 204 => {
-                        auth.dispatch(AuthAction::SetMe(None));
-                        auth.dispatch(AuthAction::SetMessage(Some("Odhlášen".into())));
-                    }
-                    Ok(r) => {
-                        auth.dispatch(AuthAction::SetMessage(Some(format!("Chyba odhlášení: {}", r.status()))));
-                    }
-                    Err(e) => {
-                        auth.dispatch(AuthAction::SetMessage(Some(format!("Chyba: {e}"))));
-                    }
-                }
-            });
-        })
+    let item_classes = |is_active: bool| -> Classes {
+        if is_active {
+            classes!(
+                "px-4", "py-2", "rounded-xl", "font-semibold", "shadow-sm" ,"bg-gray-800", "text-white"
+            )
+        } else {
+            classes!(
+                "px-4", "py-2", "rounded-xl", "font-medium", "text-gray-900", "hover:bg-black/5", "transition"
+            )
+        }
+    };
+
+    let is_active = |r: &Route| -> bool {
+        match (route.as_ref(), r) {
+            (Some(curr), target) => curr == target,
+            _ => false,
+        }
     };
 
     html! {
         <nav class="w-full border-b bg-white">
-            <div class="max-w-5xl mx-auto flex items-center justify-between p-3">
-                <div class="flex items-center gap-4">
-                    <Link<Route> to={Route::Home} classes="font-semibold">{ "Přehled" }</Link<Route>>
+            <div class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+                <Link<Route> to={Route::Home} classes="flex items-center gap-3 select-none">
+                    <span class="text-lg font-semibold tracking-tight">{ "Flashcards" }</span>
+                </Link<Route>>
+
+                <div class="flex items-center gap-2">
+                    <Link<Route> to={Route::Home} classes={item_classes(is_active(&Route::Home))}>
+                        { "Domů" }
+                    </Link<Route>>
+
                     {
                         if auth.me.is_some() {
                             html! {
                                 <>
-                                    <Link<Route> to={Route::Cards} classes="opacity-80 hover:opacity-100">{ "Kartičky" }</Link<Route>>
-                                    <Link<Route> to={Route::CardCollections} classes="opacity-80 hover:opacity-100">{ "Balíčky karet" }</Link<Route>>
-                                    <Link<Route> to={Route::Study} classes="opacity-80 hover:opacity-100">{ "Studovat" }</Link<Route>>
+                                    <Link<Route> to={Route::Cards} classes={item_classes(is_active(&Route::Cards))}>
+                                        { "Kartičky" }
+                                    </Link<Route>>
+                                    <Link<Route> to={Route::CardCollections} classes={item_classes(is_active(&Route::CardCollections))}>
+                                        { "Balíčky" }
+                                    </Link<Route>>
+                                    <Link<Route> to={Route::Study} classes={item_classes(is_active(&Route::Study))}>
+                                        { "Studovat" }
+                                    </Link<Route>>
                                 </>
                             }
                         } else {
                             html! {}
                         }
                     }
-                </div>
 
-                <div class="flex items-center gap-3">
-                    {
-                        if let Some(me) = &auth.me {
-                            html! {
-                                <>
-                                    <span class="text-sm opacity-80">{ format!("Přihlášen: {}", me.email) }</span>
-                                    <Button button_type={ButtonType::Ghost} onclick={on_logout.clone()}>{ "Odhlásit" }</Button>
-                                </>
-                            }
-                        } else {
-                            html! {
-                                <Link<Route> to={Route::Login} classes="opacity-80 hover:opacity-100">{ "Přihlásit" }</Link<Route>>
+                    <div class="ml-1 flex items-center gap-3">
+                        <div class="border-l h-6 pr-2"></div>
+                        {
+                            if let Some(me) = &auth.me {
+                                html! {
+                                    <>
+                                        <span class="text-sm text-gray-600">{ format!("Přihlášen: {}", me.email) }</span>
+                                        <Button button_type={ButtonType::Ghost} onclick={on_logout.clone()}>
+                                            { "Odhlásit" }
+                                        </Button>
+                                    </>
+                                }
+                            } else {
+                                html! {
+                                    <Link<Route> to={Route::Login} classes="px-4 py-2 rounded-xl font-medium text-gray-900 hover:bg-black/5 transition">
+                                        { "Přihlásit" }
+                                    </Link<Route>>
+                                }
                             }
                         }
-                    }
+                    </div>
                 </div>
             </div>
         </nav>

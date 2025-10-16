@@ -78,7 +78,7 @@ pub fn login_page() -> Html {
 
             {
                 if let Some(msg) = &auth.message {
-                    html!{ <p style="margin-top:1rem;">{ msg.clone() }</p> }
+                    html!{ <p style="margin-top:1rem;">{"Status: "}{ msg.clone() }</p> }
                 } else { html!{} }
             }
 
