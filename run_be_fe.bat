@@ -1,0 +1,1 @@
+cd client && trunk serve && cd .. && cd api && cargo run

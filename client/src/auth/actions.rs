@@ -1,7 +1,7 @@
 use gloo_net::http::Request;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::RequestCredentials;
-use crate::utils::constants::api_base;
+use crate::utils::functions::api_base;
 use crate::auth::{AuthAction, AuthStore, MeResponse};
 use yew::prelude::UseReducerHandle;
 

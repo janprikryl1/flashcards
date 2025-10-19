@@ -1,7 +1,10 @@
-pub fn api_base() -> String {
-    let window = web_sys::window().unwrap();
-    let location = window.location();
-    let protocol = location.protocol().unwrap();
-    let hostname = location.hostname().unwrap();
-    format!("{}//{}:3000", protocol, hostname)
-}
+pub const COLLECTION_COLORS: [&str; 8] = [
+    "#3B82F6", // modrá
+    "#A855F7", // fialová
+    "#EC4899", // růžová
+    "#10B981", // zelená
+    "#F59E0B", // oranžová
+    "#EF4444", // červená
+    "#38BDF8", // tyrkys
+    "#6366F1", // indigo
+];

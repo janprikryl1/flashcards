@@ -1,3 +1,4 @@
+use tailyew::{Button, ButtonType};
 use yew::prelude::*;
 use web_sys::{window, HtmlTextAreaElement, HtmlSelectElement};
 use crate::utils::deck::Deck;
@@ -157,19 +158,19 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
                         </div>
 
                         <div class="flex gap-2">
-                            <button
-                                type="submit"
-                                class="flex-1 inline-flex items-center justify-center rounded-lg px-4 py-2 bg-neutral-900 text-white font-medium hover:bg-black"
+                            <Button
+                                button_type={ButtonType::Submit}
+                                class="flex-1 inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium bg-success"
                             >
                                 { if props.editing_card.is_some() { "Uložit změny" } else { "Vytvořit" } }
-                            </button>
-                            <button
-                                type="button"
+                            </Button>
+                            <Button
+                                button_type={ButtonType::Button}
                                 onclick={close_click}
-                                class="inline-flex items-center justify-center rounded-lg px-4 py-2 border border-gray-300 hover:bg-gray-50"
+                                class="inline-flex items-center justify-center rounded-lg px-4 py-2 bg-gray-500"
                             >
                                 {"Zrušit"}
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </div>

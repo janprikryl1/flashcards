@@ -1,6 +1,7 @@
 use yew::prelude::*;
 use crate::auth::use_auth;
-use crate::components::icon::{render_icon, IconKind};
+use crate::components::icons::book_open_icon::BookOpenIcon;
+use crate::components::icons::folder_open_icon::FolderOpenIcon;
 
 #[function_component(StatsSummary)]
 pub fn stats_summary() -> Html {
@@ -20,7 +21,9 @@ pub fn stats_summary() -> Html {
                             <p class="text-gray-600 mb-1">{"Celkem balíčků"}</p>
                             <p class="text-4xl text-blue-600">{ deck_count }</p>
                         </div>
-                        { render_icon(&IconKind::FolderOpen, classes!("h-12","w-12","text-blue-600","opacity-50")) }
+                        <div class={classes!("h-12","w-12","text-blue-600","opacity-50")}>
+                            <FolderOpenIcon />
+                        </div>
                     </div>
                 </div>
 
@@ -30,7 +33,9 @@ pub fn stats_summary() -> Html {
                             <p class="text-gray-600 mb-1">{"Celkem kartiček"}</p>
                             <p class="text-4xl text-purple-600">{ card_count }</p>
                         </div>
-                        { render_icon(&IconKind::BookOpen, classes!("h-12","w-12","text-purple-600","opacity-50")) }
+                        <div class={classes!("h-12","w-12","text-blue-600","opacity-50")}>
+                            <BookOpenIcon />
+                        </div>
                     </div>
                 </div>
             </div>

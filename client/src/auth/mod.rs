@@ -5,7 +5,7 @@ use gloo_net::http::Request;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::RequestCredentials;
 use yew::prelude::*;
-use crate::utils::constants::api_base;
+use crate::utils::functions::api_base;
 
 #[derive(Clone, Debug, PartialEq, serde::Deserialize)]
 pub struct MeResponse {

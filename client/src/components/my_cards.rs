@@ -1,5 +1,7 @@
 use yew::prelude::*;
 use web_sys::{window, HtmlInputElement, HtmlSelectElement};
+use crate::components::icons::pencil_icon::PencilIcon;
+use crate::components::icons::trash_icon::TrashIcon;
 use crate::utils::deck::Deck;
 use crate::utils::flashcard::Flashcard;
 
@@ -173,20 +175,12 @@ pub fn my_cards(props: &MyCardsProps) -> Html {
                                                 <button onclick={edit}
                                                     class="inline-flex items-center justify-center rounded-lg px-3 py-2
                                                            border border-gray-300 hover:bg-gray-50">
-                                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M15.232 5.232l3.536 3.536M4 20h4l10.5-10.5a2.5 2.5 0 00-3.536-3.536L4 16v4z"/>
-                                                    </svg>
+                                                    <PencilIcon />
                                                 </button>
                                                 <button onclick={delete}
                                                     class="inline-flex items-center justify-center rounded-lg px-3 py-2
                                                            border border-gray-300 hover:bg-gray-50">
-                                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4m-4 0a1 1 0 00-1 1v1h6V5a1 1 0 00-1-1m-4 0h4"/>
-                                                    </svg>
+                                                    <TrashIcon />
                                                 </button>
                                             </div>
                                         </div>
