@@ -1,5 +1,5 @@
 use yew::prelude::*;
-use crate::components::card_collection::MyCardCollection;
+use crate::components::collections::card_collection::MyCardCollection;
 use crate::utils::deck::Deck;
 
 #[derive(Properties, PartialEq)]

@@ -1,5 +1,5 @@
 use yew::prelude::*;
-use crate::components::feature_card::FeatureCard;
+use crate::components::index::feature_card::FeatureCard;
 use crate::components::icons::brain_icon::BrainIcon;
 use crate::components::icons::download_icon::DownloadIcon;
 use crate::components::icons::folder_open_icon::FolderOpenIcon;

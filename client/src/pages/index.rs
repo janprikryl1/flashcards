@@ -1,7 +1,7 @@
 use yew::prelude::*;
-use crate::components::hero::Hero;
-use crate::components::main_features::MainFeatures;
-use crate::components::stats_summary::StatsSummary;
+use crate::components::index::hero::Hero;
+use crate::components::index::main_features::MainFeatures;
+use crate::components::index::stats_summary::StatsSummary;
 
 #[function_component(Index)]
 pub fn index() -> Html {

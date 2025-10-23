@@ -1,7 +1,7 @@
 use yew::prelude::*;
-use crate::components::card_edit_modal::CardEditModal;
+use crate::components::cards::card_edit_modal::CardEditModal;
+use crate::components::cards::my_cards::MyCards;
 use crate::components::icons::plus_icon::PlusIcon;
-use crate::components::my_cards::MyCards;
 use crate::utils::functions::generate_id;
 use crate::utils::deck::Deck;
 use crate::utils::flashcard::{Flashcard, FlashcardPatch, NewFlashcard};
@@ -99,42 +99,42 @@ pub fn cards() -> Html {
     html! {
         <div class="bg-slate-50 min-h-screen">
             <div class="container mx-auto px-4 py-8">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h1 class="text-3xl mb-2">{"Správa kartiček"}</h1>
-                    <p class="text-gray-600">{ format!("Celkem {} kartiček", flashcards.len()) }</p>
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 class="text-3xl mb-2">{"Správa kartiček"}</h1>
+                        <p class="text-gray-600">{ format!("Celkem {} kartiček", flashcards.len()) }</p>
+                    </div>
+
+                    <button onclick={open_new_header_btn}
+                        class="inline-flex items-center rounded-lg px-4 py-2 font-medium text-white
+                               bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow">
+                        <div class="mr-2 h-5 w-5">
+                            <PlusIcon />
+                        </div>
+                        {"Nová kartička"}
+                    </button>
                 </div>
 
-                <button onclick={open_new_header_btn}
-                    class="inline-flex items-center rounded-lg px-4 py-2 font-medium text-white
-                           bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow">
-                    <div class="mr-2 h-5 w-5">
-                        <PlusIcon />
-                    </div>
-                    {"Nová kartička"}
-                </button>
+                <MyCards
+                    flashcards={(*flashcards).clone()}
+                    decks={(*decks).clone()}
+                    on_new={on_new.clone()}
+                    on_edit={handle_edit.clone()}
+                    on_delete={on_delete}
+                />
+
+                { if *is_dialog_open {
+                    html!{
+                        <CardEditModal
+                            on_close={close_dialog.clone()}
+                            editing_card={(*editing_card).clone()}
+                            decks={(*decks).clone()}
+                            on_submit_new={on_add.clone()}
+                            on_submit_update={on_update}
+                        />
+                    }
+                } else { html!{} } }
             </div>
-
-            <MyCards
-                flashcards={(*flashcards).clone()}
-                decks={(*decks).clone()}
-                on_new={on_new.clone()}
-                on_edit={handle_edit.clone()}
-                on_delete={on_delete}
-            />
-
-            { if *is_dialog_open {
-                html!{
-                    <CardEditModal
-                        on_close={close_dialog.clone()}
-                        editing_card={(*editing_card).clone()}
-                        decks={(*decks).clone()}
-                        on_submit_new={on_add.clone()}
-                        on_submit_update={on_update}
-                    />
-                }
-            } else { html!{} } }
-        </div>
         </div>
     }
 }

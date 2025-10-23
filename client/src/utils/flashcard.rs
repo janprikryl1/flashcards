@@ -20,3 +20,14 @@ pub struct FlashcardPatch {
     pub answer: Option<String>,
     pub deck_id: Option<String>,
 }
+
+#[derive(Clone, PartialEq)]
+pub struct FlashcardUpdate {
+    pub last_reviewed: Option<String>,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StudyFlashcard {
+    pub(crate) flashcard: Flashcard,
+    pub(crate) last_reviewed: Option<String>,
+}
