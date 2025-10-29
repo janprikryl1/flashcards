@@ -3,7 +3,7 @@ use web_sys::{window, HtmlTextAreaElement};
 use yew::prelude::*;
 use crate::utils::constants::COLLECTION_COLORS;
 use crate::utils::functions::generate_id;
-use crate::utils::deck::Deck;
+use crate::utils::types::deck::Deck;
 
 #[derive(Properties, PartialEq)]
 pub struct CollectionEditModalProps {

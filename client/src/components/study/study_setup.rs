@@ -1,8 +1,9 @@
 use std::collections::HashSet;
 use yew::{classes, function_component, html, Callback, Html, Properties};
-use crate::utils::deck::Deck;
-use crate::utils::flashcard::Flashcard;
+use crate::utils::types::deck::Deck;
+use crate::utils::types::flashcard::Flashcard;
 use web_sys::{Event};
+use crate::utils::functions::download_file;
 
 #[derive(Properties, PartialEq)]
 pub struct StudySetupProps {
@@ -12,56 +13,39 @@ pub struct StudySetupProps {
     pub selected_deck_id: String,
     pub on_select_change: Callback<Event>,
     pub on_start: Callback<()>,
-    pub on_restart: Callback<()>,
-}
-
-fn pluralize_cards(n: usize) -> &'static str {
-    if n == 1 { "kartičku" } else if n < 5 { "kartičky" } else { "kartiček" }
 }
 
 #[function_component(StudySetup)]
 pub fn study_setup(props: &StudySetupProps) -> Html {
     let available_cards_count = props.available_cards.len();
-    let completed_count = props.completed_cards.len();
 
     let on_start = {
         let on_start_prop = props.on_start.clone();
         Callback::from(move |_| on_start_prop.emit(()))
     };
 
-    let on_restart = {
-        let on_restart_prop = props.on_restart.clone();
-        Callback::from(move |_| on_restart_prop.emit(()))
+    let on_export = {
+        let available_cards = props.available_cards.clone();
+        Callback::from(move |_| {
+            let data = serde_json::to_string(&available_cards);
+            match data {
+                Ok(json) => {
+                    download_file(json, "flashcards_export.json".to_string(), "application/json".to_string());
+                },
+                Err(e) => {
+                    web_sys::console::error_1(&format!("Chyba při exportu: {}", e).into());
+                }
+            }
+        })
     };
 
     html! {
         <div class="container mx-auto px-4 py-8">
             <div class="max-w-2xl mx-auto">
                 <div class="text-center mb-8">
-                    <div class="h-16 w-16 mx-auto mb-4 text-purple-600 text-5xl">{"🧠"}</div>
                     <h1 class="text-3xl mb-2">{"Režim učení"}</h1>
                     <p class="text-gray-600">{"Procvičujte své kartičky v náhodném pořadí"}</p>
                 </div>
-
-                { if completed_count > 0 {
-                    html!{
-                        <div class="p-8 mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
-                            <div class="text-center">
-                                <div class="h-16 w-16 mx-auto mb-4 text-green-600 text-5xl">{"✅"}</div>
-                                <h2 class="text-2xl mb-2 text-green-900">{"Výborně!"}</h2>
-                                <p class="text-green-700 mb-6">
-                                    { format!("Procvičili jste {} {}", completed_count, pluralize_cards(completed_count)) }
-                                </p>
-                                <button
-                                    onclick={on_restart}
-                                    class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 hover:bg-green-700 text-white"
-                                >
-                                    <span>{"Studovat znovu"}</span>
-                                </button>
-                            </div>
-                        </div>
-                    }
-                } else { html!{} }}
 
                 <div class="p-8 border rounded-xl shadow-sm">
                     <div class="space-y-6">
@@ -73,7 +57,7 @@ pub fn study_setup(props: &StudySetupProps) -> Html {
                                     value={props.selected_deck_id.clone()}
                                     onchange={props.on_select_change.clone()}
                                 >
-                                    <option value="all">{"Všechny balíčky"}</option>
+                                    <option selected={true} disabled={true}>{"Vyberte balíček"}</option>
                                     { props.decks.iter().map(|deck|
                                         html!{
                                             <option value={deck.id.clone()}>
@@ -83,14 +67,6 @@ pub fn study_setup(props: &StudySetupProps) -> Html {
                                     }
                                 </select>
                             </div>
-                        </div>
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <p class="text-sm text-gray-600">
-                                {"K dispozici: "}
-                                <span class="text-gray-900">{ available_cards_count }</span>
-                                { " " }
-                                { pluralize_cards(available_cards_count) }
-                            </p>
                         </div>
                         <button
                             onclick={on_start}
@@ -111,7 +87,17 @@ pub fn study_setup(props: &StudySetupProps) -> Html {
                         >
                             <span>{"Začít studovat"}</span>
                         </button>
-                        <button class="w-full bg-gray-300 py-3">{"Exportovat otázky do JSON"}</button>
+                        <button
+                            onclick={on_export}
+                            class={classes!(
+                                "w-full",
+                                "bg-gray-300",
+                                "py-3",
+                                if available_cards_count == 0 { "opacity-50 cursor-not-allowed" } else { "hover:opacity-90" }
+                            )}
+                        >
+                            {"Exportovat otázky do JSON"}
+                        </button>
                     </div>
                 </div>
             </div>

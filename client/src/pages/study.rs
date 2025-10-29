@@ -4,8 +4,8 @@ use wasm_bindgen::JsCast;
 use web_sys::HtmlSelectElement;
 use crate::components::study::study_session::StudySession;
 use crate::components::study::study_setup::StudySetup;
-use crate::utils::deck::Deck;
-use crate::utils::flashcard::{Flashcard, StudyFlashcard};
+use crate::utils::types::deck::Deck;
+use crate::utils::types::flashcard::{Flashcard, StudyFlashcard};
 
 fn shuffle_cards(cards: &mut [StudyFlashcard]) {
     let len = cards.len();
@@ -20,7 +20,7 @@ fn shuffle_cards(cards: &mut [StudyFlashcard]) {
 pub fn study() -> Html {
     let flashcards = use_state(Vec::<Flashcard>::new);
     let decks = use_state(Vec::new);
-    let selected_deck_id = use_state(|| "all".to_string());
+    let selected_deck_id = use_state(|| "".to_string());
     let is_studying = use_state(|| false);
     let study_cards = use_state(Vec::<StudyFlashcard>::new);
     let completed_cards = use_state(HashSet::<String>::new);
@@ -46,11 +46,7 @@ pub fn study() -> Html {
 
     let available_cards: Vec<Flashcard> = {
         let all_cards = (*flashcards).clone();
-        if *selected_deck_id == "all" {
-            all_cards
-        } else {
-            all_cards.into_iter().filter(|c| c.deck_id == *selected_deck_id).collect()
-        }
+        all_cards.into_iter().filter(|c| c.deck_id == *selected_deck_id).collect()
     };
 
     let on_start_study = {
@@ -73,8 +69,6 @@ pub fn study() -> Html {
             completed_cards.set(HashSet::<String>::new());
         })
     };
-
-    let on_restart = on_start_study.clone();
 
     let on_select_change = {
         let selected_deck_id = selected_deck_id.clone();
@@ -107,7 +101,7 @@ pub fn study() -> Html {
                 study_cards={(*study_cards).clone()}
                 decks={(*decks).clone()}
                 on_next={on_next_card}
-                on_restart={on_restart}
+                on_restart={on_start_study.clone()}
                 on_finish={on_finish_study}
             />
         }
@@ -120,7 +114,6 @@ pub fn study() -> Html {
                 selected_deck_id={(*selected_deck_id).clone()}
                 on_select_change={on_select_change}
                 on_start={on_start_study}
-                on_restart={on_restart}
             />
         }
     }

@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use crate::components::icons::pencil_icon::PencilIcon;
 use crate::components::icons::trash_icon::TrashIcon;
-use crate::utils::deck::Deck;
+use crate::utils::types::deck::Deck;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct MyCardCollectionProps {

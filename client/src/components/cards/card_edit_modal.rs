@@ -1,8 +1,8 @@
 use tailyew::{Button, ButtonType};
 use yew::prelude::*;
 use web_sys::{window, HtmlTextAreaElement, HtmlSelectElement};
-use crate::utils::deck::Deck;
-use crate::utils::flashcard::{Flashcard, FlashcardPatch, NewFlashcard};
+use crate::utils::types::deck::Deck;
+use crate::utils::types::flashcard::{Flashcard, FlashcardPatch, NewFlashcard};
 
 #[derive(Properties, PartialEq)]
 pub struct CardEditModalProps {

@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use crate::components::collections::card_collection::MyCardCollection;
-use crate::utils::deck::Deck;
+use crate::utils::types::deck::Deck;
 
 #[derive(Properties, PartialEq)]
 pub struct MyCardCollectionProps {

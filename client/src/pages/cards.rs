@@ -3,8 +3,8 @@ use crate::components::cards::card_edit_modal::CardEditModal;
 use crate::components::cards::my_cards::MyCards;
 use crate::components::icons::plus_icon::PlusIcon;
 use crate::utils::functions::generate_id;
-use crate::utils::deck::Deck;
-use crate::utils::flashcard::{Flashcard, FlashcardPatch, NewFlashcard};
+use crate::utils::types::deck::Deck;
+use crate::utils::types::flashcard::{Flashcard, FlashcardPatch, NewFlashcard};
 
 #[function_component(Cards)]
 pub fn cards() -> Html {

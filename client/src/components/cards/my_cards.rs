@@ -2,8 +2,8 @@ use yew::prelude::*;
 use web_sys::{window, HtmlInputElement, HtmlSelectElement};
 use crate::components::icons::pencil_icon::PencilIcon;
 use crate::components::icons::trash_icon::TrashIcon;
-use crate::utils::deck::Deck;
-use crate::utils::flashcard::Flashcard;
+use crate::utils::types::deck::Deck;
+use crate::utils::types::flashcard::Flashcard;
 
 #[derive(Properties, PartialEq)]
 pub struct MyCardsProps {

@@ -2,7 +2,7 @@ use yew::prelude::*;
 use crate::components::collections::collection_edit_modal::CollectionEditModal;
 use crate::components::icons::plus_icon::PlusIcon;
 use crate::components::collections::my_card_collection::MyCardCollections;
-use crate::utils::deck::Deck;
+use crate::utils::types::deck::Deck;
 
 
 #[function_component(CardCollections)]
