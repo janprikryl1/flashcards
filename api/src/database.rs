@@ -21,16 +21,27 @@ impl Database {
             .connect_with(opts)
             .await?;
 
-        // užitečné pragmata
         sqlx::query("PRAGMA journal_mode = WAL;").execute(&pool).await?;
         sqlx::query("PRAGMA foreign_keys = ON;").execute(&pool).await?;
 
-        // tabulky
+        // Tables
         sqlx::query(r#"
-            CREATE TABLE IF NOT EXISTS posts (
-                id INTEGER PRIMARY KEY,
-                title TEXT NOT NULL,
-                content TEXT NOT NULL
+            CREATE TABLE IF NOT EXISTS decks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT NOT NULL,
+                color TEXT NOT NULL
+            );
+        "#).execute(&pool).await?;
+
+        sqlx::query(r#"
+            CREATE TABLE IF NOT EXISTS cards (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question TEXT NOT NULL,
+                answer TEXT NOT NULL,
+                deck_id TEXT NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (deck_id) REFERENCES decks(id) ON DELETE CASCADE
             );
         "#).execute(&pool).await?;
 

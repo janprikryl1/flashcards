@@ -9,8 +9,8 @@ use crate::utils::functions::download_file;
 pub struct StudySetupProps {
     pub decks: Vec<Deck>,
     pub available_cards: Vec<Flashcard>,
-    pub completed_cards: HashSet<String>,
-    pub selected_deck_id: String,
+    pub completed_cards: HashSet<i64>,
+    pub selected_deck_id: i64,
     pub on_select_change: Callback<Event>,
     pub on_start: Callback<()>,
 }
@@ -54,13 +54,13 @@ pub fn study_setup(props: &StudySetupProps) -> Html {
                             <div class="relative">
                                 <select
                                     class="w-full rounded-md border px-3 py-2"
-                                    value={props.selected_deck_id.clone()}
+                                    value={props.selected_deck_id.to_string()}
                                     onchange={props.on_select_change.clone()}
                                 >
                                     <option selected={true} disabled={true}>{"Vyberte balíček"}</option>
                                     { props.decks.iter().map(|deck|
                                         html!{
-                                            <option value={deck.id.clone()}>
+                                            <option value={deck.id.to_string()}>
                                                 { deck.name.clone() }
                                             </option> }
                                         ).collect::<Html>()
@@ -87,7 +87,7 @@ pub fn study_setup(props: &StudySetupProps) -> Html {
                         >
                             <span>{"Začít studovat"}</span>
                         </button>
-                        { if (available_cards_count != 0) { html! {
+                        { if available_cards_count != 0 { html! {
                             <button
                                 onclick={on_export}
                                 class={classes!(

@@ -1,9 +1,10 @@
 pub mod post;
 pub mod user;
 pub mod login;
-pub mod card;
 pub mod app_state;
 pub mod register_payload;
 pub mod login_payload;
 pub mod me_response;
 pub mod claims;
+pub mod cards;
+pub mod decks;

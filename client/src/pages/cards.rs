@@ -13,15 +13,15 @@ pub fn cards() -> Html {
 
     // --- demo data ---
     let decks = use_state(|| vec![
-        Deck { id: "basic".into(), name: "Základní balíček".into(), description: "popis...".to_string(), color: "#6366F1".into() },
+        Deck { id: 1, name: "Základní balíček".into(), description: "popis...".to_string(), color: "#6366F1".into() },
     ]);
 
     let flashcards = use_state(|| vec![
         Flashcard {
-            id: "c1".into(),
+            id: 1,
             question: "Kolik je 1+1".into(),
             answer: "2".into(),
-            deck_id: "basic".into(),
+            deck_id: 1,
             created_at: None,
         }
     ]);
@@ -32,7 +32,7 @@ pub fn cards() -> Html {
             let mut list = (*flashcards).clone();
 
             list.push(Flashcard {
-                id: generate_id(),
+                id: 1,
                 question: new_card.question,
                 answer: new_card.answer,
                 deck_id: new_card.deck_id,
@@ -44,7 +44,7 @@ pub fn cards() -> Html {
 
     let on_update = {
         let flashcards = flashcards.clone();
-        Callback::from(move |(id, patch): (String, FlashcardPatch)| {
+        Callback::from(move |(id, patch): (i64, FlashcardPatch)| {
             let mut list = (*flashcards).clone();
             if let Some(card) = list.iter_mut().find(|c| c.id == id) {
                 if let Some(q) = patch.question { card.question = q; }
@@ -57,7 +57,7 @@ pub fn cards() -> Html {
 
     let on_delete = {
         let flashcards = flashcards.clone();
-        Callback::from(move |id: String| {
+        Callback::from(move |id: i64| {
             let mut list = (*flashcards).clone();
             list.retain(|c| c.id != id);
             flashcards.set(list);

@@ -2,15 +2,14 @@ use tailyew::{Button, ButtonType};
 use web_sys::{window, HtmlTextAreaElement};
 use yew::prelude::*;
 use crate::utils::constants::COLLECTION_COLORS;
-use crate::utils::functions::generate_id;
-use crate::utils::types::deck::Deck;
+use crate::utils::types::deck::{Deck, DeckCreate};
 
 #[derive(Properties, PartialEq)]
 pub struct CollectionEditModalProps {
     pub on_close: Callback<()>,
     pub editing_collection: Option<Deck>,
-    pub on_submit_new: Callback<Deck>,
-    pub on_submit_update: Callback<(String, Deck)>,
+    pub on_submit_new: Callback<DeckCreate>,
+    pub on_submit_update: Callback<(i64, Deck)>,
 }
 
 #[function_component(CollectionEditModal)]
@@ -80,23 +79,20 @@ pub fn collection_edit_modal(props: &CollectionEditModalProps) -> Html {
 
             if let Some(deck) = &editing_collection {
                 on_update.emit((
-                    deck.id.clone(),
+                    deck.id,
                     Deck {
-                        id: generate_id(),
+                        id: deck.id,
                         name: t,
                         description: d,
                         color: (*selected_color).clone(),
                     },
                 ));
-                if let Some(w) = window() { let _ = w.alert_with_message("Kartička byla aktualizována"); }
             } else {
-                on_new.emit(Deck {
-                    id: generate_id(),
+                on_new.emit(DeckCreate {
                     name: t,
                     description: d,
                     color: (*selected_color).clone(),
                 });
-                if let Some(w) = window() { let _ = w.alert_with_message("Kartička byla vytvořena"); }
             }
 
             on_close.emit(());

@@ -1,29 +1,42 @@
+use gloo_net::http::Request;
+use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 use crate::components::collections::collection_edit_modal::CollectionEditModal;
 use crate::components::icons::plus_icon::PlusIcon;
 use crate::components::collections::my_card_collection::MyCardCollections;
-use crate::utils::types::deck::Deck;
-
+use crate::utils::functions::api_base;
+use crate::utils::types::deck::{Deck, DeckCreate};
 
 #[function_component(CardCollections)]
 pub fn card_collections() -> Html {
-    let flashcard_len = use_state(|| 1);
     let is_dialog_open = use_state(|| false);
     let editing_collection = use_state(|| Option::<Deck>::None);
-    let decks = use_state(|| vec![
-        Deck {
-            id: "1".to_string(),
-            name: "Základní balíček".to_string(),
-            description: "xxx".to_string(),
-            color: "FFFFFF".to_string(),
-        },
-        Deck {
-            id: "2".to_string(),
-            name: "Pokročilý balíček".to_string(),
-            description: "yyy".to_string(),
-            color: "000000".to_string(),
-        },
-    ]);
+    let decks = use_state(|| vec![]);
+    let flashcard_len = decks.len();
+
+    {
+        let decks = decks.clone();
+        use_effect_with((), move |_| {
+            spawn_local(async move {
+                let resp = Request::get(&format!("{}/api/decks", api_base())).send().await;
+
+                match resp {
+                    Ok(r) if r.ok() => {
+                        if let Ok(data) = r.json::<Vec<Deck>>().await {
+                            decks.set(data);
+                        }
+                    }
+                    Ok(r) => {
+                        web_sys::console::error_1(&format!("Error fetching decks: status {}", r.status()).into());
+                    }
+                    Err(e) => {
+                        web_sys::console::error_1(&format!("Network error: {}", e).into());
+                    }
+                }
+            });
+            || ()
+        });
+    }
 
     let on_new = {
         let is_dialog_open = is_dialog_open.clone();
@@ -44,9 +57,23 @@ pub fn card_collections() -> Html {
     };
 
     let handle_delete = {
-//        let on_delete = on_delete_flashcard.clone();
- //       Callback::from(move |id: String| on_delete.emit(id))
-        Callback::from(move |id: String| println!("{id}"))
+        let decks = decks.clone();
+        Callback::from(move |id: i64| {
+            let decks = decks.clone();
+            spawn_local(async move {
+                let resp = Request::delete(&format!("{}/api/deck/{}", api_base(), id))
+                    .send()
+                    .await;
+
+                if resp.is_ok() {
+                    let mut new_list = (*decks).clone();
+                    new_list.retain(|d| d.id != id);
+                    decks.set(new_list);
+                } else {
+                    web_sys::console::error_1(&"Failed to delete deck".into());
+                }
+            });
+        })
     };
 
     let close_dialog = {
@@ -59,13 +86,69 @@ pub fn card_collections() -> Html {
     };
 
     let on_submit_new = {
-        Callback::from(move |new_card: Deck | println!("on submit new") )
+        let decks = decks.clone();
+        let is_dialog_open = is_dialog_open.clone();
+
+        Callback::from(move |new_card: DeckCreate| {
+            let decks = decks.clone();
+            let is_dialog_open = is_dialog_open.clone();
+
+            spawn_local(async move {
+                let resp = Request::post(&format!("{}/api/deck", api_base()))
+                    .json(&new_card).expect("Failed to serialize new card")
+                    .send()
+                    .await;
+
+                match resp {
+                    Ok(r) if r.ok() => {
+                        if let Ok(created_deck) = r.json::<Deck>().await {
+                            let mut current_decks = (*decks).clone();
+                            current_decks.push(created_deck);
+                            decks.set(current_decks);
+                            is_dialog_open.set(false);
+                        }
+                    }
+                    Ok(r) => {
+                        web_sys::console::error_1(&format!("Error saving deck: status {}", r.status()).into());
+                    }
+                    Err(e) => {
+                        web_sys::console::error_1(&format!("Network error: {}", e).into());
+                    }
+                }
+            });
+        })
     };
 
     let on_submit_update = {
-        //let on_update = props.on_update_flashcard.clone();
-        //Callback::from(move |payload: (String, FlashcardPatch)| on_update.emit(payload))
-        Callback::from(move |payload: (String, Deck)| println!("{}", "payload"))
+        let decks = decks.clone();
+        let is_dialog_open = is_dialog_open.clone();
+
+        Callback::from(move |(id, updated_data): (i64, Deck)| {
+            let decks = decks.clone();
+            let is_dialog_open = is_dialog_open.clone();
+
+            spawn_local(async move {
+                let resp = Request::put(&format!("{}/api/deck/{}", api_base(), id))
+                    .json(&updated_data).expect("Failed to serialize updated data")
+                    .send()
+                    .await;
+
+                match resp {
+                    Ok(r) if r.ok() => {
+                        if let Ok(updated_deck) = r.json::<Deck>().await {
+                            let mut current_decks = (*decks).clone();
+                            if let Some(index) = current_decks.iter().position(|d| d.id == id) {
+                                current_decks[index] = updated_deck;
+                                decks.set(current_decks);
+                            }
+                            is_dialog_open.set(false);
+                        }
+                    }
+                    Ok(r) => web_sys::console::error_1(&format!("Error updating: {}", r.status()).into()),
+                    Err(e) => web_sys::console::error_1(&format!("Net error: {}", e).into()),
+                }
+            });
+        })
     };
 
     let open_new_header_btn = {

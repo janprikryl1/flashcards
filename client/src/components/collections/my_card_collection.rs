@@ -6,7 +6,7 @@ use crate::utils::types::deck::Deck;
 pub struct MyCardCollectionProps {
     pub decks: Vec<Deck>,
     pub on_update_deck: Callback<Deck>,
-    pub on_delete_deck: Callback<String>,
+    pub on_delete_deck: Callback<i64>,
 }
 
 #[function_component(MyCardCollections)]

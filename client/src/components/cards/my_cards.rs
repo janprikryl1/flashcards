@@ -11,7 +11,7 @@ pub struct MyCardsProps {
     pub decks: Vec<Deck>,
     pub on_new: Callback<()>,
     pub on_edit: Callback<Flashcard>,
-    pub on_delete: Callback<String>,
+    pub on_delete: Callback<i64>,
 }
 
 #[function_component(MyCards)]
@@ -40,7 +40,7 @@ pub fn my_cards(props: &MyCardsProps) -> Html {
         Callback::from(move |_| on_new.emit(()))
     };
 
-    let get_deck = |id: &str| -> Option<Deck> {
+    let get_deck = |id: i64| -> Option<Deck> {
         props.decks.iter().find(|d| d.id == id).cloned()
     };
 
@@ -52,7 +52,7 @@ pub fn my_cards(props: &MyCardsProps) -> Html {
             let sq = (*search_query).to_lowercase();
             let matches_search = c.question.to_lowercase().contains(&sq)
                 || c.answer.to_lowercase().contains(&sq);
-            let matches_deck = (*filter_deck == "all") || (c.deck_id == *filter_deck);
+            let matches_deck = (*filter_deck == "all") || (c.deck_id == filter_deck.parse::<i64>().unwrap_or(-1));
             matches_search && matches_deck
         })
         .collect();
@@ -81,7 +81,7 @@ pub fn my_cards(props: &MyCardsProps) -> Html {
                                focus:bg-white focus:border-gray-300">
                     <option value="all">{"Všechny balíčky"}</option>
                     { for props.decks.iter().map(|d| html!{
-                        <option value={d.id.clone()}>{ d.name.clone() }</option>
+                        <option value={d.id.to_string()}>{ d.name.clone() }</option>
                     }) }
                 </select>
             </div>
@@ -121,7 +121,7 @@ pub fn my_cards(props: &MyCardsProps) -> Html {
                     html!{
                         <div class="grid gap-4">
                             { for filtered.into_iter().map(|card| {
-                                let deck = get_deck(&card.deck_id);
+                                let deck = get_deck(card.deck_id);
 
                                 let edit = {
                                     let on_edit = props.on_edit.clone();
@@ -131,11 +131,10 @@ pub fn my_cards(props: &MyCardsProps) -> Html {
 
                                 let delete = {
                                     let on_delete = props.on_delete.clone();
-                                    let id = card.id.clone();
                                     Callback::from(move |_| {
                                         if let Some(w) = window() {
                                             if w.confirm_with_message("Opravdu chcete smazat tuto kartičku?").unwrap_or(false) {
-                                                on_delete.emit(id.clone());
+                                                on_delete.emit(card.id);
                                                 let _ = w.alert_with_message("Kartička byla smazána");
                                             }
                                         }

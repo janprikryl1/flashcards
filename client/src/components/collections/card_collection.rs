@@ -7,7 +7,7 @@ use crate::utils::types::deck::Deck;
 pub struct MyCardCollectionProps {
     pub deck: Deck,
     pub on_update_deck: Callback<Deck>,
-    pub on_delete_deck: Callback<String>,
+    pub on_delete_deck: Callback<i64>,
 }
 
 #[function_component(MyCardCollection)]
@@ -22,8 +22,7 @@ pub fn my_card_collection(props: &MyCardCollectionProps) -> Html {
 
     let delete_click = {
         let on_delete = props.on_delete_deck.clone();
-        let id = deck.id.clone();
-        Callback::from(move |_| on_delete.emit(id.clone()))
+        Callback::from(move |_| on_delete.emit(deck.id))
     };
 
     let count = 1;

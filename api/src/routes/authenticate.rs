@@ -13,17 +13,12 @@ use crate::dto::me_response::MeResponse;
 use crate::dto::register_payload::RegisterPayload;
 use time::Duration as TimeDuration;
 
-pub(crate) async fn register(
-    State(state): State<AppState>,
-    Json(payload): Json<RegisterPayload>,
-) -> Result<StatusCode, (StatusCode, String)> {
+pub(crate) async fn register(State(state): State<AppState>, Json(payload): Json<RegisterPayload>) -> Result<StatusCode, (StatusCode, String)> {
     if payload.email.trim().is_empty() || payload.password.len() < 6 {
         return Err((StatusCode::BAD_REQUEST, "Email nebo heslo je krátké".into()));
     }
 
-    let hash = bcrypt::hash(&payload.password, bcrypt::DEFAULT_COST)
-        .map_err(in500)?;
-
+    let hash = bcrypt::hash(&payload.password, bcrypt::DEFAULT_COST).map_err(in500)?;
     let now = Utc::now().to_rfc3339();
 
     let res = sqlx::query("INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)")
@@ -39,11 +34,7 @@ pub(crate) async fn register(
     }
 }
 
-pub(crate) async fn login(
-    State(state): State<AppState>,
-    jar: CookieJar,
-    Json(payload): Json<LoginPayload>,
-) -> Result<(CookieJar, StatusCode), (StatusCode, String)> {
+pub(crate) async fn login(State(state): State<AppState>, jar: CookieJar, Json(payload): Json<LoginPayload>) -> Result<(CookieJar, StatusCode), (StatusCode, String)> {
     let row = sqlx::query("SELECT id, password_hash FROM users WHERE email = ?")
         .bind(&payload.email)
         .fetch_optional(&state.pool).await
@@ -57,7 +48,7 @@ pub(crate) async fn login(
     let hash: String = row.get("password_hash");
 
     if !bcrypt::verify(&payload.password, &hash).map_err(in500)? {
-        return Err((StatusCode::UNAUTHORIZED, "Neplatné přihlášení".into()));
+        return Err((StatusCode::UNAUTHORIZED, "Špatné heslo".into()));
     }
 
     let exp = (Utc::now() + Duration::days(7)).timestamp() as usize;
@@ -77,10 +68,7 @@ pub(crate) async fn login(
     Ok((jar.add(cookie), StatusCode::NO_CONTENT))
 }
 
-pub(crate) async fn me(
-    State(state): State<AppState>,
-    jar: CookieJar,
-) -> Result<Json<MeResponse>, (StatusCode, String)> {
+pub(crate) async fn me(State(state): State<AppState>, jar: CookieJar) -> Result<Json<MeResponse>, (StatusCode, String)> {
     let token = jar
         .get("session")
         .ok_or((StatusCode::UNAUTHORIZED, "Chybí session".into()))?

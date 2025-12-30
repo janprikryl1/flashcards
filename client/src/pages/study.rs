@@ -9,7 +9,9 @@ use crate::utils::types::flashcard::{Flashcard, StudyFlashcard};
 
 fn shuffle_cards(cards: &mut [StudyFlashcard]) {
     let len = cards.len();
-    if len == 0 { return; }
+    if len == 0 {
+        return;
+    }
     for i in (1..len).rev() {
         let random_idx = (js_sys::Math::random() * (i + 1) as f64).floor() as usize;
         cards.swap(i, random_idx);
@@ -20,24 +22,24 @@ fn shuffle_cards(cards: &mut [StudyFlashcard]) {
 pub fn study() -> Html {
     let flashcards = use_state(Vec::<Flashcard>::new);
     let decks = use_state(Vec::new);
-    let selected_deck_id = use_state(|| "".to_string());
+    let selected_deck_id = use_state(|| -1);
     let is_studying = use_state(|| false);
     let study_cards = use_state(Vec::<StudyFlashcard>::new);
-    let completed_cards = use_state(HashSet::<String>::new);
+    let completed_cards = use_state(HashSet::<i64>::new);
 
     {
         let flashcards_handle = flashcards.clone();
         let decks_handle = decks.clone();
         use_effect_with((), move |_| {
             let mock_decks = vec![
-                Deck { id: "1".to_string(), name: "Základy Rustu".to_string(), description: "Klíčové koncepty jazyka Rust.".to_string(), color: "#f59e0b".to_string() },
-                Deck { id: "2".to_string(), name: "Hlavní města".to_string(), description: "Geografický přehled.".to_string(), color: "#3b82f6".to_string() },
-                Deck { id: "3".to_string(), name: "Anglická slovíčka".to_string(), description: "Základní slovní zásoba.".to_string(), color: "#10b981".to_string() },
+                Deck { id: 1, name: "Základy Rustu".to_string(), description: "Klíčové koncepty jazyka Rust.".to_string(), color: "#f59e0b".to_string() },
+                Deck { id: 2, name: "Hlavní města".to_string(), description: "Geografický přehled.".to_string(), color: "#3b82f6".to_string() },
+                Deck { id: 3, name: "Anglická slovíčka".to_string(), description: "Základní slovní zásoba.".to_string(), color: "#10b981".to_string() },
             ];
             let mock_flashcards = vec![
-                Flashcard { id: "101".to_string(), deck_id: "1".to_string(), question: "Co je to 'borrowing'?".to_string(), answer: "Půjčování si reference na hodnotu bez převzetí vlastnictví.".to_string(), created_at: Some("2025-10-23T10:00:00Z".to_string()) },
-                Flashcard { id: "102".to_string(), deck_id: "1".to_string(), question: "Jaký keyword se používá pro proměnlivou proměnnou?".to_string(), answer: "`mut`".to_string(), created_at: Some("2025-10-23T10:01:00Z".to_string()) },
-                Flashcard { id: "201".to_string(), deck_id: "2".to_string(), question: "Hlavní město České republiky?".to_string(), answer: "Praha".to_string(), created_at: Some("2025-10-23T10:02:00Z".to_string()) },
+                Flashcard { id: 101, deck_id: 1, question: "Co je to 'borrowing'?".to_string(), answer: "Půjčování si reference na hodnotu bez převzetí vlastnictví.".to_string(), created_at: Some("2025-10-23T10:00:00Z".to_string()) },
+                Flashcard { id: 102, deck_id: 1, question: "Jaký keyword se používá pro proměnlivou proměnnou?".to_string(), answer: "mut".to_string(), created_at: Some("2025-10-23T10:01:00Z".to_string()) },
+                Flashcard { id: 201, deck_id: 2, question: "Hlavní město České republiky?".to_string(), answer: "Praha".to_string(), created_at: Some("2025-10-23T10:02:00Z".to_string()) },
             ];
             decks_handle.set(mock_decks);
             flashcards_handle.set(mock_flashcards);
@@ -66,7 +68,7 @@ pub fn study() -> Html {
             shuffle_cards(&mut study_session_cards);
             study_cards.set(study_session_cards);
             is_studying.set(true);
-            completed_cards.set(HashSet::<String>::new());
+            completed_cards.set(HashSet::<i64>::new());
         })
     };
 
@@ -74,13 +76,13 @@ pub fn study() -> Html {
         let selected_deck_id = selected_deck_id.clone();
         Callback::from(move |e: Event| {
             let target: HtmlSelectElement = e.target().unwrap().unchecked_into();
-            selected_deck_id.set(target.value());
+            selected_deck_id.set(target.value().parse().unwrap_or(-1));
         })
     };
 
     let on_next_card = {
         let completed_cards = completed_cards.clone();
-        Callback::from(move |card_id: String| {
+        Callback::from(move |card_id: i64| {
             let mut set = (*completed_cards).clone();
             set.insert(card_id);
             completed_cards.set(set);
@@ -111,7 +113,7 @@ pub fn study() -> Html {
                 decks={(*decks).clone()}
                 available_cards={available_cards.clone()}
                 completed_cards={(*completed_cards).clone()}
-                selected_deck_id={(*selected_deck_id).clone()}
+                selected_deck_id={*selected_deck_id}
                 on_select_change={on_select_change}
                 on_start={on_start_study}
             />

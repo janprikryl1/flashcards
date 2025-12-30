@@ -2,10 +2,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Flashcard {
-    pub id: String,
+    pub id: i64,
     pub question: String,
     pub answer: String,
-    pub deck_id: String,
+    pub deck_id: i64,
     pub created_at: Option<String>,
 }
 
@@ -13,14 +13,14 @@ pub struct Flashcard {
 pub struct NewFlashcard {
     pub question: String,
     pub answer: String,
-    pub deck_id: String,
+    pub deck_id: i64,
 }
 
 #[derive(Clone, PartialEq, Default)]
 pub struct FlashcardPatch {
     pub question: Option<String>,
     pub answer: Option<String>,
-    pub deck_id: Option<String>,
+    pub deck_id: Option<i64>,
 }
 
 #[derive(Clone, PartialEq)]

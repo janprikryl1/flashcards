@@ -9,7 +9,7 @@ use crate::utils::types::flashcard::StudyFlashcard;
 pub struct StudySessionProps {
     pub study_cards: Vec<StudyFlashcard>,
     pub decks: Vec<Deck>,
-    pub on_next: Callback<String>,
+    pub on_next: Callback<i64>,
     pub on_restart: Callback<()>,
     pub on_finish: Callback<()>,
 }
@@ -24,7 +24,7 @@ pub fn study_session(props: &StudySessionProps) -> Html {
 
     let get_deck_by_id = {
         let decks = props.decks.clone();
-        move |id: &str| -> Option<Deck> {
+        move |id: i64| -> Option<Deck> {
             decks.iter().find(|d| d.id == id).cloned()
         }
     };
@@ -56,7 +56,7 @@ pub fn study_session(props: &StudySessionProps) -> Html {
 
         Callback::from(move |_| {
             if let Some(card) = study_cards.get(*current_card_index) {
-                on_next_prop.emit(card.flashcard.id.clone());
+                on_next_prop.emit(card.flashcard.id);
             }
 
             if *current_card_index + 1 < study_cards.len() {
@@ -82,7 +82,7 @@ pub fn study_session(props: &StudySessionProps) -> Html {
                 <div class="mb-8">
                 {
                     if let Some(card) = current_card {
-                        let deck = get_deck_by_id(&card.flashcard.deck_id);
+                        let deck = get_deck_by_id(card.flashcard.deck_id);
                         html! {
                             <FlashcardView
                                 card={card}

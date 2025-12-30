@@ -10,14 +10,14 @@ pub struct CardEditModalProps {
     pub editing_card: Option<Flashcard>,
     pub decks: Vec<Deck>,
     pub on_submit_new: Callback<NewFlashcard>,
-    pub on_submit_update: Callback<(String, FlashcardPatch)>,
+    pub on_submit_update: Callback<(i64, FlashcardPatch)>,
 }
 
 #[function_component(CardEditModal)]
 pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
     let question = use_state(|| String::new());
     let answer = use_state(|| String::new());
-    let selected_deck = use_state(|| String::new());
+    let selected_deck = use_state(|| -1);
 
     {
         let question = question.clone();
@@ -28,11 +28,11 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
             if let Some(c) = editing {
                 question.set(c.question.clone());
                 answer.set(c.answer.clone());
-                selected_deck.set(c.deck_id.clone());
+                selected_deck.set(c.deck_id);
             } else {
                 question.set(String::new());
                 answer.set(String::new());
-                selected_deck.set(String::new());
+                selected_deck.set(-1);
             }
             || ()
         });
@@ -42,7 +42,7 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
         let selected_deck = selected_deck.clone();
         Callback::from(move |e: Event| {
             let el: HtmlSelectElement = e.target_unchecked_into();
-            selected_deck.set(el.value());
+            selected_deck.set(el.value().parse().unwrap());
         })
     };
 
@@ -76,9 +76,8 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
 
             let q = (*question).trim().to_string();
             let a = (*answer).trim().to_string();
-            let d = (*selected_deck).trim().to_string();
 
-            if q.is_empty() || a.is_empty() || d.is_empty() {
+            if q.is_empty() || a.is_empty() {
                 if let Some(w) = window() { let _ = w.alert_with_message("Vyplňte prosím všechna pole"); }
                 return;
             }
@@ -89,12 +88,12 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
                     FlashcardPatch {
                         question: Some(q),
                         answer: Some(a),
-                        deck_id: Some(d),
+                        deck_id: Some(*selected_deck),
                     },
                 ));
                 if let Some(w) = window() { let _ = w.alert_with_message("Kartička byla aktualizována"); }
             } else {
-                on_new.emit(NewFlashcard { question: q, answer: a, deck_id: d });
+                on_new.emit(NewFlashcard { question: q, answer: a, deck_id: *selected_deck });
                 if let Some(w) = window() { let _ = w.alert_with_message("Kartička byla vytvořena"); }
             }
 
@@ -123,12 +122,12 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
                             <label class="block text-sm mb-1">{"Balíček"}</label>
                             <select
                                 onchange={on_sel_deck}
-                                value={(*selected_deck).clone()}
+                                value={selected_deck.to_string()}
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-gray-400"
                             >
                                 <option value="" disabled=true>{"Vyberte balíček"}</option>
                                 { for props.decks.iter().map(|d| html!{
-                                    <option value={d.id.clone()}>{ d.name.clone() }</option>
+                                    <option value={d.id.to_string()}>{ d.name.clone() }</option>
                                 }) }
                             </select>
                         </div>
