@@ -87,17 +87,19 @@ pub fn study_setup(props: &StudySetupProps) -> Html {
                         >
                             <span>{"Začít studovat"}</span>
                         </button>
-                        <button
-                            onclick={on_export}
-                            class={classes!(
-                                "w-full",
-                                "bg-gray-300",
-                                "py-3",
-                                if available_cards_count == 0 { "opacity-50 cursor-not-allowed" } else { "hover:opacity-90" }
-                            )}
-                        >
-                            {"Exportovat otázky do JSON"}
-                        </button>
+                        { if (available_cards_count != 0) { html! {
+                            <button
+                                onclick={on_export}
+                                class={classes!(
+                                    "w-full",
+                                    "bg-gray-300",
+                                    "py-3",
+                                    if available_cards_count == 0 { "opacity-50 cursor-not-allowed" } else { "hover:opacity-90" }
+                                )}
+                            >
+                                {"Exportovat otázky do JSON"}
+                            </button>
+                        }} else {html! {}} }
                     </div>
                 </div>
             </div>
