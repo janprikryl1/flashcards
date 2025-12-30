@@ -46,10 +46,8 @@ async fn main() {
         .route("/api/deck/:id", get(decks::get_deck).put(decks::update_deck).delete(decks::delete_deck))
         .route("/api/decks", get(decks::list_decks))
 
-        .route("/api/posts", get(list).post(create))
-        .route("/api/posts/:id", get(get_one))
-
-
+        
+        
         .route("/api/register", post(authenticate::register))
         .route("/api/login", post(authenticate::login))
         .route("/api/me", get(authenticate::me))
