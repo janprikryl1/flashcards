@@ -1,5 +1,6 @@
 use axum::{Json, extract::State};
 use axum::extract::Path;
+use axum::response::IntoResponse;
 use http::StatusCode;
 use crate::dto::app_state::AppState;
 use crate::dto::cards::card::{FlashcardCreateDTO, FlashcardDTO, FlashcardPatchDTO};
@@ -98,4 +99,26 @@ pub(crate) async fn delete_card(State(state): State<AppState>, Path(id): Path<i6
         return Err(StatusCode::NOT_FOUND);
     }
     Ok(StatusCode::NO_CONTENT)
+}
+
+pub(crate) async fn import_cards(State(state): State<AppState>, Json(payload): Json<Vec<FlashcardCreateDTO>>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let mut tx = state.pool.begin()
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "DB Error".to_string()))?;
+
+    for card in payload {
+        sqlx::query("INSERT INTO cards (question, answer, deck_id) VALUES (?, ?, ?)")
+            .bind(&card.question)
+            .bind(&card.answer)
+            .bind(&card.deck_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Insert failed".into()))?;
+    }
+
+    tx.commit()
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Commit failed".to_string()))?;
+
+    Ok(StatusCode::CREATED)
 }

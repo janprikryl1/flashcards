@@ -3,9 +3,8 @@ use yew::{classes, function_component, html, Callback, Html, Properties};
 use crate::utils::types::deck::Deck;
 use crate::utils::types::flashcard::Flashcard;
 use web_sys::{Event};
-use crate::components::reusable::toast_provider::use_toast;
+use crate::components::import_export::import_export_component::ImportExportComponent;
 use crate::components::study_history::study_history::StudyHistory;
-use crate::utils::functions::download_file;
 
 #[derive(Properties, PartialEq)]
 pub struct StudySetupProps {
@@ -19,28 +18,11 @@ pub struct StudySetupProps {
 
 #[function_component(StudySetup)]
 pub fn study_setup(props: &StudySetupProps) -> Html {
-    let toast = use_toast();
     let available_cards_count = props.available_cards.len();
 
     let on_start = {
         let on_start_prop = props.on_start.clone();
         Callback::from(move |_| on_start_prop.emit(()))
-    };
-
-    let on_export = {
-        let available_cards = props.available_cards.clone();
-        Callback::from(move |_| {
-            let data = serde_json::to_string(&available_cards);
-            match data {
-                Ok(json) => {
-                    download_file(json, "flashcards_export.json".to_string(), "application/json".to_string());
-                },
-                Err(e) => {
-                    web_sys::console::error_1(&format!("Chyba při exportu: {}", e).into());
-                    toast.error("Chyba při exportu".to_string());
-                }
-            }
-        })
     };
 
     html! {
@@ -91,19 +73,10 @@ pub fn study_setup(props: &StudySetupProps) -> Html {
                         >
                             <span>{"Začít studovat"}</span>
                         </button>
-                        { if available_cards_count != 0 { html! {
-                            <button
-                                onclick={on_export}
-                                class={classes!(
-                                    "w-full",
-                                    "bg-gray-300",
-                                    "py-3",
-                                    if available_cards_count == 0 { "opacity-50 cursor-not-allowed" } else { "hover:opacity-90" }
-                                )}
-                            >
-                                {"Exportovat otázky do JSON"}
-                            </button>
-                        }} else {html! {}} }
+                        <ImportExportComponent
+                            decks={props.decks.clone()}
+                            available_cards={props.available_cards.clone()}
+                        />
                     </div>
                 </div>
                 <StudyHistory />

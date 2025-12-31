@@ -52,11 +52,14 @@ async fn main() {
 
         .route("/api/study-history", get(study_history::get_history).post(study_history::save_history))
         .route("/api/study-history/:id", delete(study_history::delete_history_entry))
+        
+        .route("/api/import", post(cards::import_cards))
 
         .route("/api/register", post(authenticate::register))
         .route("/api/login", post(authenticate::login))
         .route("/api/me", get(authenticate::me))
         .route("/api/logout", post(authenticate::logout))
+        
         .with_state(state)
         .layer(cors)
         .layer(Extension(db));
