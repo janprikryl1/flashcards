@@ -131,11 +131,11 @@ pub fn my_cards(props: &MyCardsProps) -> Html {
 
                                 let delete = {
                                     let on_delete = props.on_delete.clone();
+
                                     Callback::from(move |_| {
                                         if let Some(w) = window() {
                                             if w.confirm_with_message("Opravdu chcete smazat tuto kartičku?").unwrap_or(false) {
                                                 on_delete.emit(card.id);
-                                                let _ = w.alert_with_message("Kartička byla smazána");
                                             }
                                         }
                                     })

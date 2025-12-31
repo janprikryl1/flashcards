@@ -1,6 +1,7 @@
 use tailyew::{Button, ButtonType};
 use yew::prelude::*;
-use web_sys::{window, HtmlTextAreaElement, HtmlSelectElement};
+use web_sys::{HtmlTextAreaElement, HtmlSelectElement};
+use crate::components::reusable::toast_provider::use_toast;
 use crate::utils::types::deck::Deck;
 use crate::utils::types::flashcard::{Flashcard, FlashcardPatch, NewFlashcard};
 
@@ -15,6 +16,7 @@ pub struct CardEditModalProps {
 
 #[function_component(CardEditModal)]
 pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
+    let toast = use_toast();
     let question = use_state(|| String::new());
     let answer = use_state(|| String::new());
     let selected_deck = use_state(|| -1);
@@ -23,16 +25,22 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
         let question = question.clone();
         let answer = answer.clone();
         let selected_deck = selected_deck.clone();
+        let decks = props.decks.clone();
 
         use_effect_with(props.editing_card.clone(), move |editing| {
             if let Some(c) = editing {
                 question.set(c.question.clone());
                 answer.set(c.answer.clone());
                 selected_deck.set(c.deck_id);
-            } else {
+            } else { //New card
                 question.set(String::new());
                 answer.set(String::new());
-                selected_deck.set(-1);
+
+                if let Some(first_deck) = decks.first() {
+                    selected_deck.set(first_deck.id);
+                } else {
+                    selected_deck.set(-1);
+                }
             }
             || ()
         });
@@ -42,7 +50,8 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
         let selected_deck = selected_deck.clone();
         Callback::from(move |e: Event| {
             let el: HtmlSelectElement = e.target_unchecked_into();
-            selected_deck.set(el.value().parse().unwrap());
+            let val = el.value().parse::<i64>().unwrap_or(-1);
+            selected_deck.set(val);
         })
     };
 
@@ -76,9 +85,15 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
 
             let q = (*question).trim().to_string();
             let a = (*answer).trim().to_string();
+            let d_id = *selected_deck;
 
             if q.is_empty() || a.is_empty() {
-                if let Some(w) = window() { let _ = w.alert_with_message("Vyplňte prosím všechna pole"); }
+                toast.error("Vyplňte prosím všechna pole".to_string());
+                return;
+            }
+
+            if d_id == -1 {
+                toast.error("Musíte vybrat balíček!".to_string());
                 return;
             }
 
@@ -91,10 +106,10 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
                         deck_id: Some(*selected_deck),
                     },
                 ));
-                if let Some(w) = window() { let _ = w.alert_with_message("Kartička byla aktualizována"); }
+                toast.success("Kartička byla upravena".to_string())
             } else {
-                on_new.emit(NewFlashcard { question: q, answer: a, deck_id: *selected_deck });
-                if let Some(w) = window() { let _ = w.alert_with_message("Kartička byla vytvořena"); }
+                on_new.emit(NewFlashcard { question: q, answer: a, deck_id: d_id });
+                toast.success("Kartička byla vytvořena".to_string())
             }
 
             on_close.emit(());
@@ -122,12 +137,14 @@ pub fn card_edit_modal(props: &CardEditModalProps) -> Html {
                             <label class="block text-sm mb-1">{"Balíček"}</label>
                             <select
                                 onchange={on_sel_deck}
-                                value={selected_deck.to_string()}
+                                value={if *selected_deck == -1 { "".to_string() } else { selected_deck.to_string() }}
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-gray-400"
                             >
                                 <option value="" disabled=true>{"Vyberte balíček"}</option>
                                 { for props.decks.iter().map(|d| html!{
-                                    <option value={d.id.to_string()}>{ d.name.clone() }</option>
+                                    <option value={d.id.to_string()} selected={d.id == *selected_deck}>
+                                        { d.name.clone() }
+                                    </option>
                                 }) }
                             </select>
                         </div>

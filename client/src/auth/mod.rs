@@ -5,8 +5,9 @@ use gloo_net::http::Request;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::RequestCredentials;
 use yew::prelude::*;
+use crate::components::reusable::toast_provider::use_toast;
 use crate::utils::functions::api_base;
-
+//AI
 #[derive(Clone, Debug, PartialEq, serde::Deserialize)]
 pub struct MeResponse {
     pub id: i64,
@@ -57,6 +58,7 @@ pub struct AuthCtx(pub UseReducerHandle<AuthStore>);
 #[function_component(AuthProvider)]
 pub fn auth_provider(props: &AuthProviderProps) -> Html {
     let state = use_reducer(AuthStore::default);
+    let toast = use_toast();
 
     {
         let state = state.clone();
@@ -73,12 +75,15 @@ pub fn auth_provider(props: &AuthProviderProps) -> Html {
                             state.dispatch(AuthAction::SetMe(Some(me)));
                         } else {
                             state.dispatch(AuthAction::SetMe(None));
+                            toast.error("Chyba při načítání uživatele.".to_string());
                         }
                     } else {
                         state.dispatch(AuthAction::SetMe(None));
+                        toast.error("Chyba při načítání uživatele.".to_string());
                     }
                 } else {
                     state.dispatch(AuthAction::SetMe(None));
+                    toast.error("Chyba při načítání uživatele.".to_string());
                 }
                 state.dispatch(AuthAction::SetLoading(false));
             });

@@ -8,10 +8,6 @@ pub fn api_base() -> String {
     format!("{}//{}:3000", protocol, hostname)
 }
 
-pub fn generate_id() -> String {
-    js_sys::Date::now().to_string()
-}
-
 pub fn compare_ignore_case(answer: String, user_answer: String) -> bool {
     answer.trim().eq_ignore_ascii_case(user_answer.trim())
 }

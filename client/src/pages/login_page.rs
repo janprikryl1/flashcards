@@ -1,14 +1,17 @@
 use yew::prelude::*;
 use tailyew::atoms::Button;
 use tailyew::{ButtonType, Input, InputType};
+use wasm_bindgen_futures::spawn_local;
 use crate::auth::{use_auth, MeResponse};
 use crate::auth::actions::{login, register};
 use yew_router::prelude::*;
+use crate::components::reusable::toast_provider::use_toast;
 use crate::utils::routes::Route;
 
 #[function_component(LoginPage)]
 pub fn login_page() -> Html {
     let nav = use_navigator().expect("LoginPage must be under <BrowserRouter>");
+    let toast = use_toast();
     let auth = use_auth();
 
     let email = use_state(|| String::new());
@@ -35,8 +38,25 @@ pub fn login_page() -> Html {
         let auth = auth.clone();
         let email = email.clone();
         let password = password.clone();
+        let toast = toast.clone();
+
         Callback::from(move |_| {
-            register(auth.clone(), (*email).clone(), (*password).clone())
+            let auth = auth.clone();
+            let email = (*email).clone();
+            let password = (*password).clone();
+            let toast = toast.clone();
+
+            spawn_local(async move {
+                let result = register(auth, email, password).await;
+                match result {
+                    Ok(_) => {
+                        toast.success("Registrace proběhla úspěšně. Nyní se můžete přihlásit.".to_string());
+                    },
+                    Err(_) => {
+                        toast.error("Chyba při registraci".to_string());
+                    }
+                }
+            });
         })
     };
 
@@ -44,8 +64,25 @@ pub fn login_page() -> Html {
         let auth = auth.clone();
         let email = email.clone();
         let password = password.clone();
+        let toast = toast.clone();
+
         Callback::from(move |_| {
-            login(auth.clone(), (*email).clone(), (*password).clone())
+            let auth = auth.clone();
+            let email = (*email).clone();
+            let password = (*password).clone();
+            let toast = toast.clone();
+
+            spawn_local(async move {
+                let result = login(auth, email, password).await;
+                match result {
+                    Ok(_) => {
+                        toast.success("Přihlášení proběhlo úspěšně.".to_string());
+                    },
+                    Err(_) => {
+                        toast.error("Chyba při přihlášení".to_string());
+                    }
+                }
+            });
         })
     };
 

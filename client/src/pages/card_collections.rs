@@ -4,39 +4,18 @@ use yew::prelude::*;
 use crate::components::collections::collection_edit_modal::CollectionEditModal;
 use crate::components::icons::plus_icon::PlusIcon;
 use crate::components::collections::my_card_collection::MyCardCollections;
+use crate::components::reusable::toast_provider::use_toast;
 use crate::utils::functions::api_base;
+use crate::utils::hooks::use_decks::use_decks;
 use crate::utils::types::deck::{Deck, DeckCreate};
 
 #[function_component(CardCollections)]
 pub fn card_collections() -> Html {
+    let toast = use_toast();
     let is_dialog_open = use_state(|| false);
     let editing_collection = use_state(|| Option::<Deck>::None);
-    let decks = use_state(|| vec![]);
+    let decks = use_decks();
     let flashcard_len = decks.len();
-
-    {
-        let decks = decks.clone();
-        use_effect_with((), move |_| {
-            spawn_local(async move {
-                let resp = Request::get(&format!("{}/api/decks", api_base())).send().await;
-
-                match resp {
-                    Ok(r) if r.ok() => {
-                        if let Ok(data) = r.json::<Vec<Deck>>().await {
-                            decks.set(data);
-                        }
-                    }
-                    Ok(r) => {
-                        web_sys::console::error_1(&format!("Error fetching decks: status {}", r.status()).into());
-                    }
-                    Err(e) => {
-                        web_sys::console::error_1(&format!("Network error: {}", e).into());
-                    }
-                }
-            });
-            || ()
-        });
-    }
 
     let on_new = {
         let is_dialog_open = is_dialog_open.clone();
@@ -58,8 +37,12 @@ pub fn card_collections() -> Html {
 
     let handle_delete = {
         let decks = decks.clone();
+        let toast = toast.clone();
+
         Callback::from(move |id: i64| {
             let decks = decks.clone();
+            let toast = toast.clone();
+
             spawn_local(async move {
                 let resp = Request::delete(&format!("{}/api/deck/{}", api_base(), id))
                     .send()
@@ -69,8 +52,10 @@ pub fn card_collections() -> Html {
                     let mut new_list = (*decks).clone();
                     new_list.retain(|d| d.id != id);
                     decks.set(new_list);
+                    toast.success("Balíček byl smazán".to_string());
                 } else {
                     web_sys::console::error_1(&"Failed to delete deck".into());
+                    toast.error("Chyba při mazání balíčku".to_string());
                 }
             });
         })
@@ -88,14 +73,16 @@ pub fn card_collections() -> Html {
     let on_submit_new = {
         let decks = decks.clone();
         let is_dialog_open = is_dialog_open.clone();
+        let toast = toast.clone();
 
         Callback::from(move |new_card: DeckCreate| {
             let decks = decks.clone();
             let is_dialog_open = is_dialog_open.clone();
+            let toast = toast.clone();
 
             spawn_local(async move {
                 let resp = Request::post(&format!("{}/api/deck", api_base()))
-                    .json(&new_card).expect("Failed to serialize new card")
+                    .json(&new_card).expect("Failed to serialize new deck")
                     .send()
                     .await;
 
@@ -106,13 +93,16 @@ pub fn card_collections() -> Html {
                             current_decks.push(created_deck);
                             decks.set(current_decks);
                             is_dialog_open.set(false);
+                            toast.success("Balíček byl úspěšně vytvořen".to_string());
                         }
                     }
                     Ok(r) => {
                         web_sys::console::error_1(&format!("Error saving deck: status {}", r.status()).into());
+                        toast.error("Chyba při vytváření balíčku".to_string());
                     }
                     Err(e) => {
                         web_sys::console::error_1(&format!("Network error: {}", e).into());
+                        toast.error("Chyba při vytváření balíčku".to_string());
                     }
                 }
             });
@@ -122,10 +112,12 @@ pub fn card_collections() -> Html {
     let on_submit_update = {
         let decks = decks.clone();
         let is_dialog_open = is_dialog_open.clone();
+        let toast = toast.clone();
 
         Callback::from(move |(id, updated_data): (i64, Deck)| {
             let decks = decks.clone();
             let is_dialog_open = is_dialog_open.clone();
+            let toast = toast.clone();
 
             spawn_local(async move {
                 let resp = Request::put(&format!("{}/api/deck/{}", api_base(), id))
@@ -142,10 +134,17 @@ pub fn card_collections() -> Html {
                                 decks.set(current_decks);
                             }
                             is_dialog_open.set(false);
+                            toast.success("Balíček byl úspěšně aktualizován".to_string());
                         }
                     }
-                    Ok(r) => web_sys::console::error_1(&format!("Error updating: {}", r.status()).into()),
-                    Err(e) => web_sys::console::error_1(&format!("Net error: {}", e).into()),
+                    Ok(r) => {
+                        web_sys::console::error_1(&format!("Error updating: {}", r.status()).into());
+                        toast.error("Chyba při aktualizaci balíčku".to_string());
+                    },
+                    Err(e) => {
+                        web_sys::console::error_1(&format!("Net error: {}", e).into());
+                        toast.error("Chyba při aktualizaci balíčku".to_string());
+                    }
                 }
             });
         })

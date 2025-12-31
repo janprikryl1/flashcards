@@ -9,13 +9,13 @@ pub struct FlashcardViewAnswerProps {
 }
 #[function_component(FlashcardViewAnswer)]
 pub fn flashcard_view_answer(props: &FlashcardViewAnswerProps) -> Html {
-    let is_correct = compare_ignore_case(props.card.flashcard.answer.clone(), props.user_answer.to_string());
+    let is_correct = compare_ignore_case(props.card.flashcard.answer.to_string(), props.user_answer.to_string());
 
     html! {
         <>
         <div class="pt-8 border-t border-gray-200">
             <p class="text-sm text-gray-500 mb-3">{"Správná Odpověď:"}</p>
-            <p class="text-xl text-blue-600">{ props.card.flashcard.answer.clone() }</p>
+            <p class="text-xl text-blue-600">{ props.card.flashcard.answer.to_string() }</p>
 
             { if !is_correct {
                 html!{

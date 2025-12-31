@@ -9,23 +9,18 @@ pub struct Flashcard {
     pub created_at: Option<String>,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct NewFlashcard {
     pub question: String,
     pub answer: String,
     pub deck_id: i64,
 }
 
-#[derive(Clone, PartialEq, Default)]
+#[derive(Clone, PartialEq, Default, Serialize, Deserialize)]
 pub struct FlashcardPatch {
     pub question: Option<String>,
     pub answer: Option<String>,
     pub deck_id: Option<i64>,
-}
-
-#[derive(Clone, PartialEq)]
-pub struct FlashcardUpdate {
-    pub last_reviewed: Option<String>,
 }
 
 #[derive(Clone, PartialEq)]

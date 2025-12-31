@@ -1,13 +1,8 @@
-use std::sync::Arc;
-use axum::{Json, extract::State, Extension};
+use axum::{Json, extract::State};
 use axum::extract::Path;
 use http::StatusCode;
-use api::database::Database;
 use crate::dto::app_state::AppState;
-use crate::dto::cards::cards_count::CardCount;
 use crate::dto::decks::deck::{DeckCreateDTO, DeckDTO};
-use crate::dto::post::Post;
-use crate::dto::register_payload::RegisterPayload;
 
 pub(crate) async fn create_deck(State(state): State<AppState>, Json(payload): Json<DeckCreateDTO>) -> Result<Json<DeckDTO>, (StatusCode, String)> {
     let res = sqlx::query("INSERT INTO decks (name, description, color) VALUES (?, ?, ?)")

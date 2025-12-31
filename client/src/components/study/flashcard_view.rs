@@ -1,5 +1,5 @@
 use web_sys::{HtmlInputElement, InputEvent};
-use yew::{function_component, html, use_state, Callback, Html, Properties, TargetCast};
+use yew::{function_component, html, Callback, Html, Properties, TargetCast};
 use crate::components::reusable::badge::Badge;
 use crate::components::study::flashcard_view_answer::FlashcardViewAnswer;
 use crate::utils::types::deck::Deck;

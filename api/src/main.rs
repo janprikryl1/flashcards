@@ -6,7 +6,6 @@ use std::sync::Arc;
 use axum::{routing::{get, post}, Router, Extension};
 use axum::http::Method;
 use tower_http::cors::{CorsLayer, AllowOrigin, AllowHeaders, AllowMethods};
-use crate::routes::posts::{create, get_one, list};
 use crate::routes::{cards, decks};
 use tokio::net::TcpListener;
 use crate::dto::app_state::AppState;
@@ -46,8 +45,10 @@ async fn main() {
         .route("/api/deck/:id", get(decks::get_deck).put(decks::update_deck).delete(decks::delete_deck))
         .route("/api/decks", get(decks::list_decks))
 
-        
-        
+        .route("/api/card", post(cards::create_card))
+        .route("/api/card/:id", get(cards::get_card).put(cards::update_card).delete(cards::delete_card))
+        .route("/api/cards", get(cards::list_cards))
+
         .route("/api/register", post(authenticate::register))
         .route("/api/login", post(authenticate::login))
         .route("/api/me", get(authenticate::me))

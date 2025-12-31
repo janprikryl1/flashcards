@@ -1,66 +1,135 @@
+use gloo_net::http::Request;
+use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 use crate::components::cards::card_edit_modal::CardEditModal;
 use crate::components::cards::my_cards::MyCards;
 use crate::components::icons::plus_icon::PlusIcon;
-use crate::utils::functions::generate_id;
-use crate::utils::types::deck::Deck;
+use crate::components::reusable::toast_provider::use_toast;
+use crate::utils::functions::api_base;
+use crate::utils::hooks::use_cards::use_cards;
+use crate::utils::hooks::use_decks::use_decks;
 use crate::utils::types::flashcard::{Flashcard, FlashcardPatch, NewFlashcard};
 
 #[function_component(Cards)]
 pub fn cards() -> Html {
+    let toast = use_toast();
     let is_dialog_open = use_state(|| false);
     let editing_card = use_state(|| Option::<Flashcard>::None);
-
-    // --- demo data ---
-    let decks = use_state(|| vec![
-        Deck { id: 1, name: "Základní balíček".into(), description: "popis...".to_string(), color: "#6366F1".into() },
-    ]);
-
-    let flashcards = use_state(|| vec![
-        Flashcard {
-            id: 1,
-            question: "Kolik je 1+1".into(),
-            answer: "2".into(),
-            deck_id: 1,
-            created_at: None,
-        }
-    ]);
+    let decks = use_decks();
+    let flashcards = use_cards();
 
     let on_add = {
         let flashcards = flashcards.clone();
-        Callback::from(move |new_card: NewFlashcard| {
-            let mut list = (*flashcards).clone();
+        let is_dialog_open = is_dialog_open.clone();
+        let toast = toast.clone();
 
-            list.push(Flashcard {
-                id: 1,
-                question: new_card.question,
-                answer: new_card.answer,
-                deck_id: new_card.deck_id,
-                created_at: None,
+        Callback::from(move |new_card: NewFlashcard| {
+            let flashcards = flashcards.clone();
+            let is_dialog_open = is_dialog_open.clone();
+            let toast = toast.clone();
+
+            spawn_local(async move {
+                let resp = Request::post(&format!("{}/api/card", api_base()))
+                    .json(&new_card)
+                    .expect("Failed to serialize new card")
+                    .send()
+                    .await;
+
+                match resp {
+                    Ok(r) if r.ok() => {
+                        if let Ok(created_card) = r.json::<Flashcard>().await {
+                            let mut list = (*flashcards).clone();
+                            list.push(created_card);
+                            flashcards.set(list);
+                            is_dialog_open.set(false);
+                            toast.success("Kartička úspěšně vytvořena".to_string());
+                        }
+                    }
+                    Ok(r) => {
+                        web_sys::console::error_1(&format!("Error saving card: status {}", r.status()).into());
+                        toast.error("Chyba při vytváření kartičky".to_string());
+                    }
+                    Err(e) => {
+                        web_sys::console::error_1(&format!("Network error: {}", e).into());
+                        toast.error("Chyba při vytváření kartičky".to_string());
+                    }
+                }
             });
-            flashcards.set(list);
         })
     };
 
     let on_update = {
         let flashcards = flashcards.clone();
+        let toast = toast.clone();
+
         Callback::from(move |(id, patch): (i64, FlashcardPatch)| {
-            let mut list = (*flashcards).clone();
-            if let Some(card) = list.iter_mut().find(|c| c.id == id) {
-                if let Some(q) = patch.question { card.question = q; }
-                if let Some(a) = patch.answer { card.answer = a; }
-                if let Some(d) = patch.deck_id { card.deck_id = d; }
-            }
-            flashcards.set(list);
+            let flashcards = flashcards.clone();
+            let toast = toast.clone();
+
+            spawn_local(async move {
+                let resp = Request::put(&format!("{}/api/card/{}", api_base(), id))
+                    .json(&patch)
+                    .expect("Failed to serialize card")
+                    .send()
+                    .await;
+
+                match resp {
+                    Ok(r) if r.ok() => {
+                        if let Ok(created_card) = r.json::<Flashcard>().await {
+                            let mut list = (*flashcards).clone();
+                            if let Some(card) = list.iter_mut().find(|c| c.id == id) {
+                                /*if let Some(q) = patch.question { card.question = q; }
+                                if let Some(a) = patch.answer { card.answer = a; }
+                                if let Some(d) = patch.deck_id { card.deck_id = d; }*/
+                                *card = created_card;
+                            }
+                            flashcards.set(list);
+                            toast.success("Kartička upravena".to_string());
+                        }
+                    }
+                    Ok(r) => {
+                        web_sys::console::error_1(&format!("Error saving card: status {}", r.status()).into());
+                        toast.error("Chyba při ukládání změn".to_string());
+                    }
+                    Err(e) => {
+                        web_sys::console::error_1(&format!("Network error: {}", e).into());
+                        toast.error("Chyba při ukládání změn".to_string());
+                    }
+                }
+            });
         })
     };
 
     let on_delete = {
         let flashcards = flashcards.clone();
+        let toast = toast.clone();
+
         Callback::from(move |id: i64| {
-            let mut list = (*flashcards).clone();
-            list.retain(|c| c.id != id);
-            flashcards.set(list);
+            let flashcards = flashcards.clone();
+            let toast = toast.clone();
+
+            spawn_local(async move {
+                let resp = Request::delete(&format!("{}/api/card/{}", api_base(), id))
+                    .send()
+                    .await;
+
+                match resp {
+                    Ok(r) if r.ok() => {
+                        let mut current_list = (*flashcards).clone();
+                        current_list.retain(|c| c.id != id);
+                        flashcards.set(current_list);
+                        toast.success("Kartička smazána".to_string());
+                    }
+                    Ok(r) => {
+                        web_sys::console::error_1(&format!("Error deleting card: status {}", r.status()).into());
+                        toast.error("Chyba při mazání kartičky".to_string());
+                    }
+                    Err(e) => {
+                        web_sys::console::error_1(&format!("Network error: {}", e).into());
+                        toast.error("Chyba při mazání kartičky".to_string());
+                    }
+                }
+            });
         })
     };
 

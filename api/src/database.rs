@@ -39,7 +39,7 @@ impl Database {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 question TEXT NOT NULL,
                 answer TEXT NOT NULL,
-                deck_id TEXT NOT NULL,
+                deck_id INTEGER NOT NULL,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (deck_id) REFERENCES decks(id) ON DELETE CASCADE
             );
