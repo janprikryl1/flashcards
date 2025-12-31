@@ -4,14 +4,15 @@ use axum_extra::extract::cookie::{Cookie, SameSite};
 use axum_extra::extract::CookieJar;
 use chrono::{Duration, Utc};
 use http::StatusCode;
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 use sqlx::Row;
 use crate::dto::app_state::AppState;
-use crate::dto::claims::Claims;
-use crate::dto::login_payload::LoginPayload;
-use crate::dto::me_response::MeResponse;
-use crate::dto::register_payload::RegisterPayload;
 use time::Duration as TimeDuration;
+use crate::utils::utils::extract_user_id;
+use crate::dto::user::claims::Claims;
+use crate::dto::user::login_payload::LoginPayload;
+use crate::dto::user::me_response::MeResponse;
+use crate::dto::user::register_payload::RegisterPayload;
 
 pub(crate) async fn register(State(state): State<AppState>, Json(payload): Json<RegisterPayload>) -> Result<StatusCode, (StatusCode, String)> {
     if payload.email.trim().is_empty() || payload.password.len() < 6 {
@@ -69,20 +70,14 @@ pub(crate) async fn login(State(state): State<AppState>, jar: CookieJar, Json(pa
 }
 
 pub(crate) async fn me(State(state): State<AppState>, jar: CookieJar) -> Result<Json<MeResponse>, (StatusCode, String)> {
-    let token = jar
-        .get("session")
-        .ok_or((StatusCode::UNAUTHORIZED, "Chybí session".into()))?
-        .value()
-        .to_string();
-
-    let data = decode::<Claims>(
-        &token,
-        &DecodingKey::from_secret(state.jwt_secret.as_bytes()),
-        &Validation::new(Algorithm::HS256),
-    ).map_err(|_| (StatusCode::UNAUTHORIZED, "Neplatný token".into()))?;
+    let user_id = extract_user_id(&jar, &state);
+    if user_id.is_err() {
+        return Err((StatusCode::UNAUTHORIZED, "Unauthorized".into()));
+    }
+    let user_id = user_id.unwrap();
 
     let user = sqlx::query("SELECT id, email FROM users WHERE id = ?")
-        .bind(data.claims.sub)
+        .bind(user_id)
         .fetch_one(&state.pool).await
         .map_err(in500)?;
 
@@ -92,18 +87,13 @@ pub(crate) async fn me(State(state): State<AppState>, jar: CookieJar) -> Result<
     }))
 }
 
-
-pub(crate) async fn logout(
-    _state: State<AppState>,
-    jar: CookieJar,
-) -> Result<(CookieJar, StatusCode), (StatusCode, String)> {
+pub(crate) async fn logout(_state: State<AppState>, jar: CookieJar) -> Result<(CookieJar, StatusCode), (StatusCode, String)> {
     let mut cookie = Cookie::new("session", "");
     cookie.set_path("/");
     cookie.set_max_age(TimeDuration::seconds(0));
 
     Ok((jar.remove(cookie), StatusCode::NO_CONTENT))
 }
-
 
 fn is_unique_violation(e: &sqlx::Error) -> bool {
     matches!(e, sqlx::Error::Database(db) if db.message().contains("UNIQUE"))

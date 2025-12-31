@@ -25,11 +25,11 @@ pub fn flashcard_view(props: &FlashcardViewProps) -> Html {
     };
 
     html! {
-        <div class="p-12 min-h-[400px] flex flex-col justify-center items-center cursor-pointer transition-all hover:shadow-lg border rounded-xl">
+        <div class="p-12 min-h-[400px] flex flex-col justify-center items-center transition-all hover:shadow-lg border rounded-xl">
             <div class="mb-6">
                 {
                     if let Some(d) = &props.deck {
-                        html!{ <Badge name={d.name.clone()} color={d.color.clone()} /> }
+                        html!{ <Badge name={format!("Balíček {}", d.name.clone())} color={d.color.clone()} /> }
                     } else {
                         html!{}
                     }
@@ -45,12 +45,16 @@ pub fn flashcard_view(props: &FlashcardViewProps) -> Html {
                     required=true
                     value={props.user_answer.to_string()}
                     oninput={on_answer_change}
+                    disabled={props.show_answer}
                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg"
                 />
                 {
                     if props.show_answer {
                         html!{
-                            <FlashcardViewAnswer card={props.card.clone()} user_answer={props.user_answer.clone()} />
+                            <FlashcardViewAnswer
+                                card={props.card.clone()}
+                                user_answer={props.user_answer.clone()}
+                            />
                         }
                     } else {
                         html!{}

@@ -3,6 +3,8 @@ use yew::{classes, function_component, html, Callback, Html, Properties};
 use crate::utils::types::deck::Deck;
 use crate::utils::types::flashcard::Flashcard;
 use web_sys::{Event};
+use crate::components::reusable::toast_provider::use_toast;
+use crate::components::study_history::study_history::StudyHistory;
 use crate::utils::functions::download_file;
 
 #[derive(Properties, PartialEq)]
@@ -17,6 +19,7 @@ pub struct StudySetupProps {
 
 #[function_component(StudySetup)]
 pub fn study_setup(props: &StudySetupProps) -> Html {
+    let toast = use_toast();
     let available_cards_count = props.available_cards.len();
 
     let on_start = {
@@ -34,6 +37,7 @@ pub fn study_setup(props: &StudySetupProps) -> Html {
                 },
                 Err(e) => {
                     web_sys::console::error_1(&format!("Chyba při exportu: {}", e).into());
+                    toast.error("Chyba při exportu".to_string());
                 }
             }
         })
@@ -43,7 +47,7 @@ pub fn study_setup(props: &StudySetupProps) -> Html {
         <div class="container mx-auto px-4 py-8">
             <div class="max-w-2xl mx-auto">
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl mb-2">{"Režim učení"}</h1>
+                    <h1 class="text-3xl mb-2">{"Učení"}</h1>
                     <p class="text-gray-600">{"Procvičujte své kartičky v náhodném pořadí"}</p>
                 </div>
 
@@ -102,6 +106,7 @@ pub fn study_setup(props: &StudySetupProps) -> Html {
                         }} else {html! {}} }
                     </div>
                 </div>
+                <StudyHistory />
             </div>
         </div>
     }

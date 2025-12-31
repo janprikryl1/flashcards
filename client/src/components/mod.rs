@@ -6,3 +6,4 @@ pub mod reusable;
 pub mod index;
 pub mod cards;
 pub mod collections;
+pub mod study_history;

@@ -1,6 +1,7 @@
 use tailyew::{Button, ButtonType};
-use web_sys::{window, HtmlTextAreaElement};
+use web_sys::{HtmlTextAreaElement};
 use yew::prelude::*;
+use crate::components::reusable::toast_provider::use_toast;
 use crate::utils::constants::COLLECTION_COLORS;
 use crate::utils::types::deck::{Deck, DeckCreate};
 
@@ -14,6 +15,7 @@ pub struct CollectionEditModalProps {
 
 #[function_component(CollectionEditModal)]
 pub fn collection_edit_modal(props: &CollectionEditModalProps) -> Html {
+    let toast = use_toast();
     let title = use_state(|| String::new());
     let description = use_state(|| String::new());
     let selected_color = use_state(|| COLLECTION_COLORS[0].to_string());
@@ -73,7 +75,7 @@ pub fn collection_edit_modal(props: &CollectionEditModalProps) -> Html {
             let d = (*description).trim().to_string();
 
             if t.is_empty() {
-                if let Some(w) = window() { let _ = w.alert_with_message("Vyplňte prosím název"); }
+                toast.error("Vyplňte prosím název".to_string());
                 return;
             }
 

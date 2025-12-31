@@ -46,6 +46,18 @@ impl Database {
         "#).execute(&pool).await?;
 
         sqlx::query(r#"
+            CREATE TABLE IF NOT EXISTS study_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                deck_id INTEGER NOT NULL,
+                filled_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                accuracy FLOAT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (deck_id) REFERENCES decks(id) ON DELETE CASCADE
+            );
+        "#).execute(&pool).await?;
+
+        sqlx::query(r#"
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email TEXT NOT NULL UNIQUE,

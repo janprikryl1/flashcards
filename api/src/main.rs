@@ -1,12 +1,13 @@
 mod database;
 mod dto;
 mod routes;
+mod utils;
 
 use std::sync::Arc;
-use axum::{routing::{get, post}, Router, Extension};
+use axum::{routing::{get, post, delete}, Router, Extension};
 use axum::http::Method;
 use tower_http::cors::{CorsLayer, AllowOrigin, AllowHeaders, AllowMethods};
-use crate::routes::{cards, decks};
+use crate::routes::{cards, decks, study_history};
 use tokio::net::TcpListener;
 use crate::dto::app_state::AppState;
 use crate::routes::authenticate;
@@ -48,6 +49,9 @@ async fn main() {
         .route("/api/card", post(cards::create_card))
         .route("/api/card/:id", get(cards::get_card).put(cards::update_card).delete(cards::delete_card))
         .route("/api/cards", get(cards::list_cards))
+
+        .route("/api/study-history", get(study_history::get_history).post(study_history::save_history))
+        .route("/api/study-history/:id", delete(study_history::delete_history_entry))
 
         .route("/api/register", post(authenticate::register))
         .route("/api/login", post(authenticate::login))

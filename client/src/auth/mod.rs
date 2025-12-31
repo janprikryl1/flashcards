@@ -67,7 +67,8 @@ pub fn auth_provider(props: &AuthProviderProps) -> Html {
                 state.dispatch(AuthAction::SetLoading(true));
                 let resp = Request::get(&format!("{}/api/me", api_base()))
                     .credentials(RequestCredentials::Include)
-                    .send().await;
+                    .send()
+                    .await;
 
                 if let Ok(r) = resp {
                     if r.ok() {

@@ -11,7 +11,7 @@ pub struct StudySessionProps {
     pub decks: Vec<Deck>,
     pub on_next: Callback<i64>,
     pub on_restart: Callback<()>,
-    pub on_finish: Callback<()>,
+    pub on_finish: Callback<u8>,
 }
 
 #[function_component(StudySession)]
@@ -33,7 +33,6 @@ pub fn study_session(props: &StudySessionProps) -> Html {
         let show_answer = show_answer.clone();
         let correct_answer_count = correct_answer_count.clone();
         let user_answer = user_answer.clone();
-
         let current_card = props.study_cards.get(*current_card_index).cloned();
 
         Callback::from(move |_| {
@@ -53,6 +52,7 @@ pub fn study_session(props: &StudySessionProps) -> Html {
         let study_cards = props.study_cards.clone();
         let on_next_prop = props.on_next.clone();
         let on_finish_prop = props.on_finish.clone();
+        let correct_answer_count = correct_answer_count.clone();
 
         Callback::from(move |_| {
             if let Some(card) = study_cards.get(*current_card_index) {
@@ -64,11 +64,13 @@ pub fn study_session(props: &StudySessionProps) -> Html {
                 user_answer.set("".to_string());
                 show_answer.set(false);
             } else {
-                on_finish_prop.emit(());
+                let accuracy: u8 = ((*correct_answer_count as f32 / total_answer_count as f32) * 100.0) as u8;
+                on_finish_prop.emit(accuracy);
             }
         })
     };
 
+    //AI
     let current_card = (*props.study_cards).get(*current_card_index).cloned();
     let progress = if !props.study_cards.is_empty() {
         ((*current_card_index as f64 + if *show_answer { 1.0 } else { 0.0 }) / props.study_cards.len() as f64) * 100.0
@@ -77,7 +79,11 @@ pub fn study_session(props: &StudySessionProps) -> Html {
     html! {
         <div class="container mx-auto px-4 py-8">
             <div class="max-w-3xl mx-auto">
-                <ProgressBar progress={progress} current_card_index={*current_card_index} total_cards={props.study_cards.len()} />
+                <ProgressBar
+                    progress={progress}
+                    current_card_index={*current_card_index}
+                    total_cards={props.study_cards.len()}
+                />
                 <p>{"Správně: "}{correct_answer_count.to_string()}{"/"}{total_answer_count}</p>
                 <div class="mb-8">
                 {
@@ -112,8 +118,14 @@ pub fn study_session(props: &StudySessionProps) -> Html {
                         html!{
                             <>
                                 <button onclick={on_next_card} class="flex-1 px-4 py-3 rounded-md bg-blue-600 text-white text-lg hover:opacity-90">
-                                    { if *current_card_index < props.study_cards.len() - 1 { html!{ <span>{"Další kartička"}</span> } }
-                                      else { html!{ <span>{"Dokončit"}</span> } }
+                                    { if *current_card_index < props.study_cards.len() - 1 {
+                                        html!{
+                                            <span>{"Další kartička"}</span>
+                                        }
+                                    }
+                                      else { html! {
+                                        <span>{"Dokončit"}</span>
+                                      } }
                                     }
                                 </button>
                             </>

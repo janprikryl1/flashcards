@@ -14,14 +14,14 @@ pub fn flashcard_view_answer(props: &FlashcardViewAnswerProps) -> Html {
     html! {
         <>
         <div class="pt-8 border-t border-gray-200">
-            <p class="text-sm text-gray-500 mb-3">{"Správná Odpověď:"}</p>
+            <p class="text-sm text-gray-500 mb-3">{"Správná odpověď:"}</p>
             <p class="text-xl text-blue-600">{ props.card.flashcard.answer.to_string() }</p>
 
             { if !is_correct {
                 html!{
                     <>
                         <p class="text-sm text-gray-500 mt-6 mb-3">{"Vaše odpověď:"}</p>
-                        <p class="text-xl text-red-600">{"\""}{ props.user_answer.trim().to_string() }{"\""}</p>
+                        <p class="text-xl text-red-600">{ props.user_answer.trim().to_string() }</p>
                     </>
                 }
             } else {
@@ -32,11 +32,11 @@ pub fn flashcard_view_answer(props: &FlashcardViewAnswerProps) -> Html {
         <div>
             {if is_correct {
                 html!{
-                    <p class="mt-4 text-green-600 font-medium">{"Správně!"}</p>
+                    <p class="mt-4 text-green-600 font-medium">{"Správně, jen tak dál!"}</p>
                 }
             } else {
                 html!{
-                    <p class="mt-4 text-red-600 font-medium">{"Špatně!"}</p>
+                    <p class="mt-4 text-red-600 font-medium">{"Špatně, je potřeba stále procvičovat!"}</p>
                 }
             }}
         </div>

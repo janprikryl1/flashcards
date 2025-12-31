@@ -1,50 +1,28 @@
 use std::collections::HashSet;
+use gloo_net::http::Request;
 use yew::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::HtmlSelectElement;
+use wasm_bindgen_futures::spawn_local;
+use web_sys::{HtmlSelectElement, RequestCredentials};
+use crate::utils::functions::api_base;
+use crate::components::reusable::toast_provider::use_toast;
 use crate::components::study::study_session::StudySession;
 use crate::components::study::study_setup::StudySetup;
-use crate::utils::types::deck::Deck;
+use crate::utils::functions::shuffle_cards;
+use crate::utils::hooks::use_cards::use_cards;
+use crate::utils::hooks::use_decks::use_decks;
 use crate::utils::types::flashcard::{Flashcard, StudyFlashcard};
-
-fn shuffle_cards(cards: &mut [StudyFlashcard]) {
-    let len = cards.len();
-    if len == 0 {
-        return;
-    }
-    for i in (1..len).rev() {
-        let random_idx = (js_sys::Math::random() * (i + 1) as f64).floor() as usize;
-        cards.swap(i, random_idx);
-    }
-}
+use crate::utils::types::study_history::StudyHistoryCreate;
 
 #[function_component(Study)]
 pub fn study() -> Html {
-    let flashcards = use_state(Vec::<Flashcard>::new);
-    let decks = use_state(Vec::new);
+    let toast = use_toast();
+    let flashcards = use_cards();
+    let decks = use_decks();
     let selected_deck_id = use_state(|| -1);
     let is_studying = use_state(|| false);
     let study_cards = use_state(Vec::<StudyFlashcard>::new);
     let completed_cards = use_state(HashSet::<i64>::new);
-
-    {
-        let flashcards_handle = flashcards.clone();
-        let decks_handle = decks.clone();
-        use_effect_with((), move |_| {
-            let mock_decks = vec![
-                Deck { id: 1, name: "Základy Rustu".to_string(), description: "Klíčové koncepty jazyka Rust.".to_string(), color: "#f59e0b".to_string() },
-                Deck { id: 2, name: "Hlavní města".to_string(), description: "Geografický přehled.".to_string(), color: "#3b82f6".to_string() },
-                Deck { id: 3, name: "Anglická slovíčka".to_string(), description: "Základní slovní zásoba.".to_string(), color: "#10b981".to_string() },
-            ];
-            let mock_flashcards = vec![
-                Flashcard { id: 101, deck_id: 1, question: "Co je to 'borrowing'?".to_string(), answer: "Půjčování si reference na hodnotu bez převzetí vlastnictví.".to_string(), created_at: Some("2025-10-23T10:00:00Z".to_string()) },
-                Flashcard { id: 102, deck_id: 1, question: "Jaký keyword se používá pro proměnlivou proměnnou?".to_string(), answer: "mut".to_string(), created_at: Some("2025-10-23T10:01:00Z".to_string()) },
-                Flashcard { id: 201, deck_id: 2, question: "Hlavní město České republiky?".to_string(), answer: "Praha".to_string(), created_at: Some("2025-10-23T10:02:00Z".to_string()) },
-            ];
-            decks_handle.set(mock_decks);
-            flashcards_handle.set(mock_flashcards);
-        });
-    }
 
     let available_cards: Vec<Flashcard> = {
         let all_cards = (*flashcards).clone();
@@ -91,8 +69,41 @@ pub fn study() -> Html {
 
     let on_finish_study = {
         let is_studying = is_studying.clone();
-        Callback::from(move |_| {
-            is_studying.set(false);
+        let selected_deck_id = selected_deck_id.clone();
+        let toast = toast.clone();
+
+        Callback::from(move |accuracy: u8| {
+            let is_studying = is_studying.clone();
+            let selected_deck_id = selected_deck_id.clone();
+            let toast = toast.clone();
+
+            //Save study history
+            spawn_local(async move {
+                let study_history = StudyHistoryCreate {
+                    deck_id: *selected_deck_id,
+                    accuracy
+                };
+                let resp = Request::post(&format!("{}/api/study-history", api_base()))
+                    .credentials(RequestCredentials::Include)
+                    .json(&study_history)
+                    .expect("Failed to serialize data")
+                    .send()
+                    .await;
+
+                match resp {
+                    Ok(r) if r.ok() => {
+                        is_studying.set(false);
+                    }
+                    Ok(r) => {
+                        web_sys::console::error_1(&format!("Error saving history: status {}", r.status()).into());
+                        toast.error("Chyba při ukládání historie".to_string());
+                    }
+                    Err(e) => {
+                        web_sys::console::error_1(&format!("Network error: {}", e).into());
+                        toast.error("Chyba při ukládání historie".to_string());
+                    }
+                }
+            });
         })
     };
 

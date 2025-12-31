@@ -6,6 +6,7 @@ use wasm_bindgen_futures::spawn_local;
 use crate::auth::use_auth;
 use crate::components::icons::book_open_icon::BookOpenIcon;
 use crate::components::icons::folder_open_icon::FolderOpenIcon;
+use crate::components::reusable::toast_provider::use_toast;
 use crate::utils::functions::api_base;
 
 #[derive(Clone, PartialEq, Deserialize, Default)]
@@ -16,6 +17,7 @@ struct CardCountDto {
 
 #[function_component(StatsSummary)]
 pub fn stats_summary() -> Html {
+    let toast = use_toast();
     let auth = use_auth();
     let counts = use_state(|| CardCountDto::default());
 
@@ -37,9 +39,11 @@ pub fn stats_summary() -> Html {
                     }
                     Ok(r) => {
                         web_sys::console::error_1(&format!("Error fetching counts: status {}", r.status()).into());
+                        toast.error("Chyba při načítání dat".to_string());
                     }
                     Err(e) => {
                         web_sys::console::error_1(&format!("Network error: {}", e).into());
+                        toast.error("Chyba při načítání dat".to_string());
                     }
                 }
             });
