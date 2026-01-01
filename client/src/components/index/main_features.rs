@@ -41,7 +41,7 @@ pub fn main_features() -> Html {
 
                 <FeatureCard
                     title="Export &amp; Import"
-                    description="Zálohujte a sdílejte své kartičky ve formátu JSON nebo CSV"
+                    description="Zálohujte a sdílejte své kartičky ve formátu JSON"
                     route="import-export"
                     icon_bg="bg-orange-100"
                     icon_tone="text-orange-600"

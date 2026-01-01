@@ -6,7 +6,7 @@ use crate::dto::app_state::AppState;
 use crate::dto::cards::card::{FlashcardCreateDTO, FlashcardDTO, FlashcardPatchDTO};
 use crate::dto::cards::cards_count::CardCount;
 
-pub(crate) async fn card_count(State(state): State<AppState>) -> Result<Json<CardCount>, (StatusCode, String)> {
+pub async fn card_count(State(state): State<AppState>) -> Result<Json<CardCount>, (StatusCode, String)> {
     let pool = &state.pool;
 
     let cards_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM cards")
@@ -25,7 +25,7 @@ pub(crate) async fn card_count(State(state): State<AppState>) -> Result<Json<Car
     }))
 }
 
-pub(crate) async fn list_cards(State(state): State<AppState>) -> Result<Json<Vec<FlashcardDTO>>, (StatusCode, String)> {
+pub async fn list_cards(State(state): State<AppState>) -> Result<Json<Vec<FlashcardDTO>>, (StatusCode, String)> {
     let rows = sqlx::query_as::<_, FlashcardDTO>("SELECT id, question, answer, deck_id, created_at FROM cards")
         .fetch_all(&state.pool)
         .await
@@ -34,7 +34,7 @@ pub(crate) async fn list_cards(State(state): State<AppState>) -> Result<Json<Vec
     Ok(Json(rows))
 }
 
-pub(crate) async fn get_card(State(state): State<AppState>, Path(id): Path<i64>) -> Result<Json<FlashcardDTO>, StatusCode> {
+pub async fn get_card(State(state): State<AppState>, Path(id): Path<i64>) -> Result<Json<FlashcardDTO>, StatusCode> {
     let row = sqlx::query_as::<_, FlashcardDTO>("SELECT id, question, answer, deck_id, created_at FROM cards WHERE id = ?")
         .bind(id)
         .fetch_one(&state.pool)
@@ -43,7 +43,7 @@ pub(crate) async fn get_card(State(state): State<AppState>, Path(id): Path<i64>)
     Ok(Json(row))
 }
 
-pub(crate) async fn create_card(State(state): State<AppState>, Json(payload): Json<FlashcardCreateDTO>) -> Result<Json<FlashcardDTO>, StatusCode> {
+pub async fn create_card(State(state): State<AppState>, Json(payload): Json<FlashcardCreateDTO>) -> Result<Json<FlashcardDTO>, StatusCode> {
     let result = sqlx::query("INSERT INTO cards (question, answer, deck_id) VALUES (?, ?, ?)")
         .bind(&payload.question)
         .bind(&payload.answer)
@@ -63,7 +63,7 @@ pub(crate) async fn create_card(State(state): State<AppState>, Json(payload): Js
     }
 }
 
-pub(crate) async fn update_card(State(state): State<AppState>, Path(id): Path<i64>, Json(payload): Json<FlashcardPatchDTO>) -> Result<Json<FlashcardDTO>, StatusCode> {
+pub async fn update_card(State(state): State<AppState>, Path(id): Path<i64>, Json(payload): Json<FlashcardPatchDTO>) -> Result<Json<FlashcardDTO>, StatusCode> {
     let result = sqlx::query("UPDATE cards SET question = ?, answer = ?, deck_id = ? WHERE id = ?")
         .bind(&payload.question)
         .bind(&payload.answer)
@@ -87,7 +87,7 @@ pub(crate) async fn update_card(State(state): State<AppState>, Path(id): Path<i6
     Ok(Json(row))
 }
 
-pub(crate) async fn delete_card(State(state): State<AppState>, Path(id): Path<i64>) -> Result<StatusCode, StatusCode> {
+pub async fn delete_card(State(state): State<AppState>, Path(id): Path<i64>) -> Result<StatusCode, StatusCode> {
     let result = sqlx::query("DELETE FROM cards WHERE id = ?")
         .bind(id)
         .execute(&state.pool)
@@ -101,8 +101,8 @@ pub(crate) async fn delete_card(State(state): State<AppState>, Path(id): Path<i6
     Ok(StatusCode::NO_CONTENT)
 }
 
-pub(crate) async fn import_cards(State(state): State<AppState>, Json(payload): Json<Vec<FlashcardCreateDTO>>) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let mut tx = state.pool.begin()
+pub async fn import_cards(State(state): State<AppState>, Json(payload): Json<Vec<FlashcardCreateDTO>>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let mut tx = state.pool.begin() //AI
         .await
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "DB Error".to_string()))?;
 

@@ -25,6 +25,6 @@ pub struct FlashcardPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct StudyFlashcard {
-    pub(crate) flashcard: Flashcard,
-    pub(crate) last_reviewed: Option<String>,
+    pub flashcard: Flashcard,
+    pub last_reviewed: Option<String>,
 }

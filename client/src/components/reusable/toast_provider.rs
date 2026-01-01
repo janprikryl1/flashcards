@@ -2,6 +2,7 @@ use std::rc::Rc;
 use yew::prelude::*;
 use crate::components::reusable::toast::{Toast, ToastType};
 //AI
+
 #[derive(Clone, PartialEq)]
 pub struct ToastStore {
     pub message: Option<String>,

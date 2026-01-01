@@ -16,7 +16,8 @@ pub async fn register(dispatch: UseReducerHandle<AuthStore>, email: String, pass
     let resp = Request::post(&format!("{}/api/register", api_base()))
         .credentials(RequestCredentials::Include)
         .header("Content-Type", "application/json")
-        .json(&body).expect("serialize body")
+        .json(&body)
+        .expect("Failed serialize body")
         .send().await;
 
     let result = match resp {

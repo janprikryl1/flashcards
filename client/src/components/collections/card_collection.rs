@@ -27,11 +27,10 @@ pub fn my_card_collection(props: &MyCardCollectionProps) -> Html {
 
     let count = 1;
     let color = if deck.color.is_empty() { "#3B82F6".into() } else { format!("#{}", deck.color.trim_start_matches('#')) };
-    let top_bar_style = format!("height:12px;background-color:{color}");
 
     html! {
         <div class="overflow-hidden rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-shadow">
-            <div style={top_bar_style}></div>
+            <div style={format!("height:12px;background-color:{color}")}></div>
             <div class="p-6">
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex-1">

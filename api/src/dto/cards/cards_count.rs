@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 #[derive(Clone, Serialize)]
-pub(crate) struct CardCount {
-    pub(crate) cards: i64,
-    pub(crate) decks: i64,
+pub struct CardCount {
+    pub cards: i64,
+    pub decks: i64,
 }

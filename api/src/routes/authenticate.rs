@@ -14,9 +14,18 @@ use crate::dto::user::login_payload::LoginPayload;
 use crate::dto::user::me_response::MeResponse;
 use crate::dto::user::register_payload::RegisterPayload;
 
-pub(crate) async fn register(State(state): State<AppState>, Json(payload): Json<RegisterPayload>) -> Result<StatusCode, (StatusCode, String)> {
+pub async fn register(State(state): State<AppState>, Json(payload): Json<RegisterPayload>) -> Result<StatusCode, (StatusCode, String)> {
     if payload.email.trim().is_empty() || payload.password.len() < 6 {
         return Err((StatusCode::BAD_REQUEST, "Email nebo heslo je krátké".into()));
+    }
+
+    let email_exists = sqlx::query("SELECT 1 FROM users WHERE email = ?")
+        .bind(&payload.email)
+        .fetch_optional(&state.pool)
+        .await
+        .map_err(in500)?;
+    if email_exists.is_some() {
+        return Err((StatusCode::CONFLICT, "Email už existuje".into()));
     }
 
     let hash = bcrypt::hash(&payload.password, bcrypt::DEFAULT_COST).map_err(in500)?;
@@ -30,12 +39,11 @@ pub(crate) async fn register(State(state): State<AppState>, Json(payload): Json<
 
     match res {
         Ok(_) => Ok(StatusCode::CREATED),
-        Err(e) if is_unique_violation(&e) => Err((StatusCode::CONFLICT, "Email už existuje".into())),
         Err(e) => Err(in500(e)),
     }
 }
 
-pub(crate) async fn login(State(state): State<AppState>, jar: CookieJar, Json(payload): Json<LoginPayload>) -> Result<(CookieJar, StatusCode), (StatusCode, String)> {
+pub async fn login(State(state): State<AppState>, jar: CookieJar, Json(payload): Json<LoginPayload>) -> Result<(CookieJar, StatusCode), (StatusCode, String)> {
     let row = sqlx::query("SELECT id, password_hash FROM users WHERE email = ?")
         .bind(&payload.email)
         .fetch_optional(&state.pool).await
@@ -69,7 +77,7 @@ pub(crate) async fn login(State(state): State<AppState>, jar: CookieJar, Json(pa
     Ok((jar.add(cookie), StatusCode::NO_CONTENT))
 }
 
-pub(crate) async fn me(State(state): State<AppState>, jar: CookieJar) -> Result<Json<MeResponse>, (StatusCode, String)> {
+pub async fn me(State(state): State<AppState>, jar: CookieJar) -> Result<Json<MeResponse>, (StatusCode, String)> {
     let user_id = extract_user_id(&jar, &state);
     if user_id.is_err() {
         return Err((StatusCode::UNAUTHORIZED, "Unauthorized".into()));
@@ -87,16 +95,12 @@ pub(crate) async fn me(State(state): State<AppState>, jar: CookieJar) -> Result<
     }))
 }
 
-pub(crate) async fn logout(_state: State<AppState>, jar: CookieJar) -> Result<(CookieJar, StatusCode), (StatusCode, String)> {
+pub async fn logout(_state: State<AppState>, jar: CookieJar) -> Result<(CookieJar, StatusCode), (StatusCode, String)> {
     let mut cookie = Cookie::new("session", "");
     cookie.set_path("/");
     cookie.set_max_age(TimeDuration::seconds(0));
 
     Ok((jar.remove(cookie), StatusCode::NO_CONTENT))
-}
-
-fn is_unique_violation(e: &sqlx::Error) -> bool {
-    matches!(e, sqlx::Error::Database(db) if db.message().contains("UNIQUE"))
 }
 
 fn in500<E: std::fmt::Display>(e: E) -> (StatusCode, String) {

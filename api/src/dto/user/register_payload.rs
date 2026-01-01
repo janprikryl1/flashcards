@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Deserialize)]
-pub(crate) struct RegisterPayload {
-    pub(crate) email: String,
-    pub(crate) password: String,
+pub struct RegisterPayload {
+    pub email: String,
+    pub password: String,
 }

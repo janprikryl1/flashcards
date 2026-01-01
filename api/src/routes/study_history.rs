@@ -7,7 +7,7 @@ use crate::utils::utils::extract_user_id;
 use crate::dto::app_state::AppState;
 use crate::dto::study_history::{StudyHistoryCreateDTO, StudyHistoryDTO};
 
-pub(crate) async fn save_history(State(state): State<AppState>, jar: CookieJar, Json(payload): Json<StudyHistoryCreateDTO>) -> Result<impl IntoResponse, (StatusCode, String)> {
+pub async fn save_history(State(state): State<AppState>, jar: CookieJar, Json(payload): Json<StudyHistoryCreateDTO>) -> Result<impl IntoResponse, (StatusCode, String)> {
     let user_id = extract_user_id(&jar, &state);
     if user_id.is_err() {
         return Err((StatusCode::UNAUTHORIZED, "Unauthorized".into()));
@@ -27,7 +27,7 @@ pub(crate) async fn save_history(State(state): State<AppState>, jar: CookieJar, 
     }
 }
 
-pub(crate) async fn get_history(State(state): State<AppState>, jar: CookieJar) -> Result<Json<Vec<StudyHistoryDTO>>, StatusCode> {
+pub async fn get_history(State(state): State<AppState>, jar: CookieJar) -> Result<Json<Vec<StudyHistoryDTO>>, StatusCode> {
     let user_id = extract_user_id(&jar, &state);
     if user_id.is_err() {
         return Err(StatusCode::UNAUTHORIZED);
@@ -48,7 +48,7 @@ pub(crate) async fn get_history(State(state): State<AppState>, jar: CookieJar) -
     Ok(Json(rows))
 }
 
-pub(crate) async fn delete_history_entry(State(state): State<AppState>, jar: CookieJar, Path(id): Path<i64>) -> Result<impl IntoResponse, (StatusCode, String)> {
+pub async fn delete_history_entry(State(state): State<AppState>, jar: CookieJar, Path(id): Path<i64>) -> Result<impl IntoResponse, (StatusCode, String)> {
     let user_id = extract_user_id(&jar, &state);
     if user_id.is_err() {
         return Err((StatusCode::UNAUTHORIZED, "Unauthorized".into()));

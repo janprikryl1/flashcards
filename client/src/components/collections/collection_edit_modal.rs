@@ -71,10 +71,7 @@ pub fn collection_edit_modal(props: &CollectionEditModalProps) -> Html {
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
 
-            let t = (*title).trim().to_string();
-            let d = (*description).trim().to_string();
-
-            if t.is_empty() {
+            if title.is_empty() {
                 toast.error("Vyplňte prosím název".to_string());
                 return;
             }
@@ -84,16 +81,16 @@ pub fn collection_edit_modal(props: &CollectionEditModalProps) -> Html {
                     deck.id,
                     Deck {
                         id: deck.id,
-                        name: t,
-                        description: d,
-                        color: (*selected_color).clone(),
+                        name: title.to_string(),
+                        description: description.to_string(),
+                        color: selected_color.to_string(),
                     },
                 ));
             } else {
                 on_new.emit(DeckCreate {
-                    name: t,
-                    description: d,
-                    color: (*selected_color).clone(),
+                    name: title.to_string(),
+                    description: description.to_string(),
+                    color: selected_color.to_string(),
                 });
             }
 

@@ -2,14 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base styles for the body */
 body {
-    @apply bg-background text-neutral; /* Use custom background and text colors for the light theme */
+    @apply bg-background text-neutral;
 }
 
-/* Dark mode styles for the body */
 body.dark {
-    @apply bg-background-dark text-foreground-dark; /* Apply dark theme colors */
+    @apply bg-background-dark text-foreground-dark;
 }
 
 header,
@@ -22,7 +20,6 @@ body.dark footer {
     @apply bg-secondary-dark text-foreground-dark;
 }
 
-/* Other custom styles for dark mode */
 body.dark .text-accent {
     @apply text-accent-dark;
 }

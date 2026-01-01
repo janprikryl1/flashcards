@@ -82,7 +82,8 @@ pub fn card_collections() -> Html {
 
             spawn_local(async move {
                 let resp = Request::post(&format!("{}/api/deck", api_base()))
-                    .json(&new_card).expect("Failed to serialize new deck")
+                    .json(&new_card)
+                    .expect("Failed to serialize new deck")
                     .send()
                     .await;
 
@@ -121,7 +122,8 @@ pub fn card_collections() -> Html {
 
             spawn_local(async move {
                 let resp = Request::put(&format!("{}/api/deck/{}", api_base(), id))
-                    .json(&updated_data).expect("Failed to serialize updated data")
+                    .json(&updated_data)
+                    .expect("Failed to serialize updated data")
                     .send()
                     .await;
 

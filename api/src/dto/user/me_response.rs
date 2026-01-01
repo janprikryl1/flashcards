@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 #[derive(Serialize)]
-pub(crate) struct MeResponse {
-    pub(crate) id: i64,
-    pub(crate) email: String,
+pub struct MeResponse {
+    pub id: i64,
+    pub email: String,
 }

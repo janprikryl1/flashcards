@@ -78,9 +78,6 @@ pub fn cards() -> Html {
                         if let Ok(created_card) = r.json::<Flashcard>().await {
                             let mut list = (*flashcards).clone();
                             if let Some(card) = list.iter_mut().find(|c| c.id == id) {
-                                /*if let Some(q) = patch.question { card.question = q; }
-                                if let Some(a) = patch.answer { card.answer = a; }
-                                if let Some(d) = patch.deck_id { card.deck_id = d; }*/
                                 *card = created_card;
                             }
                             flashcards.set(list);

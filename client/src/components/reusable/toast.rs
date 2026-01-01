@@ -17,6 +17,7 @@ pub struct ToastProps {
 #[function_component(Toast)]
 pub fn toast(props: &ToastProps) -> Html {
     let on_close = props.on_close.clone();
+
     use_effect_with((), move |_| {
         let timeout = Timeout::new(3000, move || {
             on_close.emit(());

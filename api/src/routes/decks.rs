@@ -4,7 +4,7 @@ use http::StatusCode;
 use crate::dto::app_state::AppState;
 use crate::dto::decks::deck::{DeckCreateDTO, DeckDTO};
 
-pub(crate) async fn create_deck(State(state): State<AppState>, Json(payload): Json<DeckCreateDTO>) -> Result<Json<DeckDTO>, (StatusCode, String)> {
+pub async fn create_deck(State(state): State<AppState>, Json(payload): Json<DeckCreateDTO>) -> Result<Json<DeckDTO>, (StatusCode, String)> {
     let res = sqlx::query("INSERT INTO decks (name, description, color) VALUES (?, ?, ?)")
         .bind(&payload.name)
         .bind(&payload.description)
@@ -26,7 +26,7 @@ pub(crate) async fn create_deck(State(state): State<AppState>, Json(payload): Js
     }
 }
 
-pub(crate) async fn list_decks(State(state): State<AppState>) -> Result<Json<Vec<DeckDTO>>, (StatusCode, String)> {
+pub async fn list_decks(State(state): State<AppState>) -> Result<Json<Vec<DeckDTO>>, (StatusCode, String)> {
     let rows = sqlx::query_as::<_, DeckDTO>("SELECT id, name, description, color FROM decks")
         .fetch_all(&state.pool)
         .await
@@ -35,7 +35,7 @@ pub(crate) async fn list_decks(State(state): State<AppState>) -> Result<Json<Vec
     Ok(Json(rows))
 }
 
-pub(crate) async fn get_deck(State(state): State<AppState>, Path(id): Path<i64>) -> Result<Json<DeckDTO>, StatusCode> {
+pub async fn get_deck(State(state): State<AppState>, Path(id): Path<i64>) -> Result<Json<DeckDTO>, StatusCode> {
     let row = sqlx::query_as::<_, DeckDTO>("SELECT id, name, description, color FROM decks WHERE id = ?")
         .bind(id)
         .fetch_one(&state.pool)
@@ -44,7 +44,7 @@ pub(crate) async fn get_deck(State(state): State<AppState>, Path(id): Path<i64>)
     Ok(Json(row))
 }
 
-pub(crate) async fn update_deck(State(state): State<AppState>, Path(id): Path<i64>, Json(payload): Json<DeckCreateDTO>) -> Result<Json<DeckDTO>, StatusCode> {
+pub async fn update_deck(State(state): State<AppState>, Path(id): Path<i64>, Json(payload): Json<DeckCreateDTO>) -> Result<Json<DeckDTO>, StatusCode> {
     let result = sqlx::query("UPDATE decks SET name = ?, description = ?, color = ? WHERE id = ?")
         .bind(&payload.name)
         .bind(&payload.description)
@@ -70,7 +70,7 @@ pub(crate) async fn update_deck(State(state): State<AppState>, Path(id): Path<i6
     Ok(Json(updated_deck))
 }
 
-pub(crate) async fn delete_deck(State(state): State<AppState>, Path(id): Path<i64>) -> Result<StatusCode, StatusCode> {
+pub async fn delete_deck(State(state): State<AppState>, Path(id): Path<i64>) -> Result<StatusCode, StatusCode> {
     //Delete all cards in this deck
     let result = sqlx::query("DELETE FROM cards WHERE deck_id = ?")
         .bind(id)

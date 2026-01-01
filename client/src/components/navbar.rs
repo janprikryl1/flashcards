@@ -19,14 +19,11 @@ pub fn navbar() -> Html {
     };
 
     let item_classes_desktop = |is_active: bool| -> Classes {
+        let base = classes!("px-4", "py-2", "rounded-xl");
         if is_active {
-            classes!(
-                "px-4", "py-2", "rounded-xl", "font-semibold", "shadow-sm" ,"bg-gray-800", "text-white"
-            )
+            classes!(base , "font-semibold", "shadow-sm" ,"bg-gray-800", "text-white")
         } else {
-            classes!(
-                "px-4", "py-2", "rounded-xl", "font-medium", "text-gray-900", "hover:bg-black/5", "transition"
-            )
+            classes!(base, "font-medium", "text-gray-900", "hover:bg-black/5", "transition")
         }
     };
 
